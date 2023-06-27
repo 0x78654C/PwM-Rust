@@ -16,8 +16,8 @@ fn password_match_simple_test(){
 
 #[test]
 fn password_match_pwm() {
-    let password = "@#$ASDSA#$#@34234asdASDas";
-    let pass_substring = &password[2..10];
+    let password = "password1234";
+    let pass_substring = &password[2..12];
     let hash_result = "p0XtEZ3yARyE0CfS+9nzZW17udJOTxJQRDdWSIMVnVA=";
     let salt = pass_substring.as_bytes();
     let config = Config {
@@ -29,11 +29,12 @@ fn password_match_pwm() {
         thread_mode: ThreadMode::Parallel,
         secret: &[],
         ad: &[],
-        hash_length: 16,
+        hash_length: 32,
     };
     let hash = argon2::hash_encoded(password.as_bytes(), salt, &config).unwrap();
-    let hash_enc = encode(hash);
-
+    println!{"{}", pass_substring};
+    println!("{:?}", salt);
+    //let hash_enc = encode(hash);
     //let matches = argon2::verify_encoded(&hash, password).unwrap();
-    assert_eq!(hash_enc, hash_result);
+    assert_eq!(hash, hash_result);
 }
