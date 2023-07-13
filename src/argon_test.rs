@@ -1,5 +1,5 @@
 #[cfg(test)]
-extern crate pwm_lib;
+extern crate lib;
 use argon2::{self, Config, ThreadMode, Variant, Version};
 use base64::encode;
 
@@ -19,6 +19,6 @@ fn password_match_pwm() {
     let password = "password1234";
     let pass_substring = &password[2..12];
     let hash_result = "p0XtEZ3yARyE0CfS+9nzZW17udJOTxJQRDdWSIMVnVA=";
-    let hash = a
+
     assert_eq!(hash, hash_result);
 }
