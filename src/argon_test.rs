@@ -1,8 +1,9 @@
 #[cfg(test)]
-extern crate lib;
 use argon2::{self, Config, ThreadMode, Variant, Version};
-use base64::encode;
+use base64::encode; 
 
+#[path="./libs/argon_lib.rs"]
+mod argon_lib;
 
 #[test]
 fn password_match_simple_test(){
@@ -16,9 +17,10 @@ fn password_match_simple_test(){
 
 #[test]
 fn password_match_pwm() {
-    let password = "password1234";
-    let pass_substring = &password[2..12];
+    let password = "@#$ASDSA#$#@34234asdASDas";
     let hash_result = "p0XtEZ3yARyE0CfS+9nzZW17udJOTxJQRDdWSIMVnVA=";
-
-    assert_eq!(hash, hash_result);
+    let argon_hash = argon_lib::argon_password_hash(password);
+    //let enc = encode(argon_hash);
+    println!("Encrypted: {}", argon_hash);
+    assert_eq!(argon_hash, hash_result);
 }
