@@ -50,7 +50,7 @@ fn get_valid_key(key: &str) -> Vec<u8> {
     bytes
 }
 
-///Decryption using AES-GCM 128
+///Decryption using AES-GCM 256
 ///iv_data_mac is a string that contains the iv/nonce, data, and mac values. All these values
 /// must be hex encoded, and separated by "/" i.e. [hex(iv)/hex(data)/hex(mac)]. This function decodes
 /// the values. key (or password) is the raw (not hex encoded) password
