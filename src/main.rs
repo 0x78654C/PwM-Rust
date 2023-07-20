@@ -61,19 +61,19 @@ fn create_vault(){
     let mut master_password1 = String::new();
     let mut master_password2 = String::new();
     println!("{}", "Enter vault name:");
-    stdin().read_line(&mut vault_name);
+    let _=stdin().read_line(&mut vault_name);
     if vault_name.len() < 3{
         println!("{}", "Vault name must be at least 3 characters long!");
         return;
     }
     println!("{}", "Master Password: ");
-    stdin().read_line(&mut master_password1);
+    let _=stdin().read_line(&mut master_password1);
     if master_password1.len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
     println!("{}", "Confirm Master Password: ");
-    stdin().read_line(&mut master_password2);
+    let _=stdin().read_line(&mut master_password2);
 
      if master_password1 != master_password2{
         println!("{}", "Passwords are not the same!");
