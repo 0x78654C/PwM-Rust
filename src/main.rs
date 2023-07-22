@@ -14,7 +14,7 @@ mod argon_lib;
 #[path="./libs/aes_lib.rs"]
 mod aes_lib;
 
-const VAULT_DIR: &str = "Vaults";
+const VAULT_DIR:&str = "Vaults";
 const HELP_MESSAGE: &str = "\
 PwM Copyright @ 2020-2022 0x078654c
 PwM - A simple password manager to store localy the authentification data encrypted for a application using Rijndael AES-256 and Argon2 for password hash.
@@ -56,6 +56,7 @@ fn main() {
     }
 }
 
+// Create vaults
 fn create_vault(){
     let mut vault_name = String::new();
     let mut master_password1 = String::new();
@@ -66,6 +67,14 @@ fn create_vault(){
         println!("{}", "Vault name must be at least 3 characters long!");
         return;
     }
+
+    let vault=format!("{}{}{}{}{}",".\\",VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    if vault_exist_first{
+        println!("Vault {} already exist!", vault_name.trim()); 
+        return;
+    }
+
     println!("{}", "Master Password: ");
     let _=stdin().read_line(&mut master_password1);
     if master_password1.len() < 12{
@@ -80,26 +89,23 @@ fn create_vault(){
      }else{
         let hash = argon_lib::argon_password_hash(master_password1.as_str());
         let data = aes_lib::encrypt("".as_bytes(), hash.as_str());
-        let dir_exist:bool = Path::new(VAULT_DIR).is_dir();
+        let dir_exist:bool = Path::new(&VAULT_DIR).is_dir();
         if !dir_exist{
             let _ =fs::create_dir(VAULT_DIR); 
         }
-        let sep = "\\";
-        let mut vault_dir = VAULT_DIR.to_string();
-        vault_dir.to_string().push_str(sep);
-        vault_dir.to_string().push_str(vault_name.as_str());
-        let vault_exist: bool = Path::new(vault_name.as_str()).is_file();
-        println!("{}", vault_exist);
+        let vault_exist: bool = Path::new(vault.as_str()).is_file();
         if !vault_exist{
-            println!("{}",vault_name);
-            let path = vault_name.trim();
-            let mut file =  File::create(path).expect("File exist?");
+            let mut file =  File::create(vault.to_string()).expect("File exist?");
             let _ = file.write_all(data.as_bytes());
-            println!("{}","Vault was created!");
+            println!("Vault {} was created!", vault_name.trim());
+        }else{
+            println!("Vault {} already exist!", vault);  
         }
      }
 }
 
+
+// Delete vaults.
 
 // Check maximum  of tries. used in while loops for exit them at a certain count.
 fn check_max_tries()->bool{
