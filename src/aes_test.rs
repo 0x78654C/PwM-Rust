@@ -9,8 +9,7 @@ fn test_aes(){
 	let password = "12345";
 	let enc = aes_lib::encrypt(data.as_bytes(), password);
 	println!("Encrypt: {}",enc.as_str());
-	let dec_bytes =  aes_lib::decrypt(enc.as_str(),password).unwrap();
-	let decrypt_string = from_utf8(&dec_bytes).unwrap(); 
+	let decrypt_string =  aes_lib::decrypt(enc.as_str(),password);
 	println!("Decrypt: {}", decrypt_string);
 	assert_eq!(data, decrypt_string);
 }
