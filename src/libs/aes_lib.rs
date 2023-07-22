@@ -54,8 +54,8 @@ fn get_valid_key(key: &str) -> Vec<u8> {
 ///iv_data_mac is a string that contains the iv/nonce, data, and mac values. All these values
 /// must be hex encoded, and separated by "/" i.e. [hex(iv)/hex(data)/hex(mac)]. This function decodes
 /// the values. key (or password) is the raw (not hex encoded) password
-pub fn decrypt(iv_data_mac: &str, key: &str) -> String {
-    let (iv, data, mac) = split_iv_data_mac(iv_data_mac).expect("error");
+pub fn decrypt(iv_data_mac: &str, key: &str) -> Result<Vec<u8>, Box<dyn Error>> {
+    let (iv, data, mac) = split_iv_data_mac(iv_data_mac)?;
     let key = get_valid_key(key);
 
     let key_size = crypto::aes::KeySize::KeySize256;
@@ -67,13 +67,12 @@ pub fn decrypt(iv_data_mac: &str, key: &str) -> String {
     // create a list where the decoded data will be saved. dst is transformed in place. It must be exactly the same
     // size as the encrypted data
     let mut dst: Vec<u8> = repeat(0).take(data.len()).collect();
-    let result = decipher.decrypt(&data, &mut dst, &mac);
+    //let result = decipher.decrypt(&data, &mut dst, &mac);
 
-    if result {
-        return str::from_utf8(&dst).unwrap().to_string();
-     }else{
-        return String::from("error decrypt");
-     }
+    //if result { println!("Successful decryption"); }
+    //println!("\nDecrypted {}", str::from_utf8(&dst).unwrap());
+
+    Ok(dst)
 }
 
 /// Creates an initial vector (iv). This is also called a nonce
