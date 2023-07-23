@@ -67,11 +67,8 @@ pub fn decrypt(iv_data_mac: &str, key: &str) -> Result<Vec<u8>, Box<dyn Error>> 
     // create a list where the decoded data will be saved. dst is transformed in place. It must be exactly the same
     // size as the encrypted data
     let mut dst: Vec<u8> = repeat(0).take(data.len()).collect();
-    //let result = decipher.decrypt(&data, &mut dst, &mac);
-
-    //if result { println!("Successful decryption"); }
-    //println!("\nDecrypted {}", str::from_utf8(&dst).unwrap());
-
+    let _ = decipher.decrypt(&data, &mut dst, &mac);
+    
     Ok(dst)
 }
 
