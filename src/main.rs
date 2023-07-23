@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use core::str::from_utf8;
+use base64::encode;
 use argon2::{self, Config, ThreadMode, Variant, Version};
 mod aes_test;
 mod argon_test;
@@ -92,8 +93,11 @@ fn create_vault(){
      if master_password1.trim() != master_password2.trim(){
         println!("{}", "Passwords are not the same!");
      }else{
-        let hash = argon_lib::argon_password_hash(master_password1.as_str().trim());
-        let data = aes_lib::encrypt("1".as_bytes(), hash.as_str());
+        let password = master_password1.trim();
+        let hash = argon_lib::argon_password_hash(password);
+        let enc_hash = encode(hash);
+        let enc_data = "23";
+        let data = aes_lib::encrypt(enc_data.as_bytes(), enc_hash.as_str());
         let dir_exist:bool = Path::new(&VAULT_DIR).is_dir();
         if !dir_exist{
             let _ =fs::create_dir(VAULT_DIR); 
@@ -116,7 +120,10 @@ fn delete_vaults(){
     let mut master_password = String::new();
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
-    let vault=format!("{}{}{}{}{}",".\\",VAULT_DIR,"\\",vault_name.trim(),".x");
+    let current_exe = env::current_exe().expect("");
+    let current_path = current_exe.display();
+    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
+    let vault=format!("{}{}{}{}{}",cur_path,VAULT_DIR,"\\",vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} deoes not exist!", vault_name.trim()); 
@@ -124,18 +131,19 @@ fn delete_vaults(){
     }
     let mut file = vault;
     let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
-
     println!("{}", "Master Password: ");
     let _=stdin().read_line(&mut master_password);
-    if master_password.trim().len() < 12{
+    let password = master_password.trim();
+    if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
-    let hash = argon_lib::argon_password_hash(master_password.as_str().trim());
-    let decrypted_bytes = aes_lib::decrypt(data.as_str(), &hash).unwrap();
+    //TODO: check why it decrypts with any password
+    let hash = argon_lib::argon_password_hash(password);
+    let enc_hash = encode(hash);
+    let decrypted_bytes = aes_lib::decrypt(data.as_str(), enc_hash.as_str()).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    print!("{}",decrypt_string);
-    if decrypt_string.contains("error") {
+    if decrypt_string != "23"{
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
         //fs::remove_file(file).expect("Vault already deleted?");
