@@ -1,6 +1,6 @@
 #[cfg(test)]
 use argon2::{self, Config, ThreadMode, Variant, Version};
-use base64::encode; 
+ 
 
 #[path="./libs/argon_lib.rs"]
 mod argon_lib;
