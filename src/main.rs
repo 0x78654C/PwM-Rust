@@ -88,7 +88,7 @@ fn create_vault(){
         return;
     }
     println!("{}", "Confirm Master Password: ");
-    let _=stdin().read_line(&mut master_password2);
+    let _ = stdin().read_line(&mut master_password2);
 
      if master_password1.trim() != master_password2.trim(){
         println!("{}", "Passwords are not the same!");
@@ -98,7 +98,7 @@ fn create_vault(){
         let enc_hash = encode(hash);
         let enc_data = "23";
         let data = aes_lib::encrypt(enc_data.as_bytes(), enc_hash.as_str());
-        let dir_exist:bool = Path::new(&VAULT_DIR).is_dir();
+        let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
         if !dir_exist{
             let _ =fs::create_dir(VAULT_DIR); 
         }
@@ -126,7 +126,7 @@ fn delete_vaults(){
     let vault=format!("{}{}{}{}{}",cur_path,VAULT_DIR,"\\",vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} deoes not exist!", vault_name.trim()); 
+        println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
     let mut file = vault;
@@ -138,11 +138,11 @@ fn delete_vaults(){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
-    //TODO: check why it decrypts with any password
     let hash = argon_lib::argon_password_hash(password);
     let enc_hash = encode(hash);
     let decrypted_bytes = aes_lib::decrypt(data.as_str(), enc_hash.as_str()).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
+    println!("Decrypt: {}",decrypt_string);
     if decrypt_string != "23"{
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
