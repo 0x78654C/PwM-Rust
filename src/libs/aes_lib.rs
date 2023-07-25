@@ -40,7 +40,7 @@ fn split_iv_data_mac(orig: &str) -> Result<(Vec<u8>, Vec<u8>, Vec<u8>), Box<dyn 
 fn get_valid_key(key: &str) -> Vec<u8> {
     let mut bytes = key.as_bytes().to_vec();
     if bytes.len() < 16 {
-        for j in 0..(16 - bytes.len()) {
+        for _j in 0..(16 - bytes.len()) {
             bytes.push(0x00);
         }
     } else if bytes.len() > 16 {
@@ -75,7 +75,7 @@ pub fn decrypt(iv_data_mac: &str, key: &str) -> Result<Vec<u8>, Box<dyn Error>> 
 /// Creates an initial vector (iv). This is also called a nonce
 fn get_iv(size: usize) -> Vec<u8> {
     let mut iv = vec![];
-    for j in 0..size {
+    for _j in 0..size {
         let r = rand::random();
         iv.push(r);
     }
