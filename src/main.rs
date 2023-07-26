@@ -60,6 +60,10 @@ fn main() {
     if arg1 == "-delv" {
         delete_vaults();
     }
+
+    if arg1 == "-listv" {
+        list_vaults();
+    }
 }
 
 // Create vaults
@@ -152,6 +156,21 @@ fn delete_vaults(){
     }else{
         fs::remove_file(file).expect("Vault already deleted?");
         println!("Vault {} was deleted!", vault_name.trim().to_string());
+    }
+}
+
+// List vaults.
+fn list_vaults() {
+    let current_exe = env::current_exe().expect("");
+    let current_path = current_exe.display();
+    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
+    let vault = format!("{}{}",cur_path,VAULT_DIR);
+    println!("List of current vaults:");
+    for file_vault in fs::read_dir(vault).unwrap() {
+        let split_path:Vec<_> = file_vault.unwrap().path().display().to_string().split('\\').collect();
+        let  file_count =  file_vault.unwrap().path().display().to_string().split('\\').count();
+        //let file = split_path[file_count - 1];
+        println!("{}", file_vault.unwrap().path().display());
     }
 }
 
