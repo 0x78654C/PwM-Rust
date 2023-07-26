@@ -95,9 +95,11 @@ fn create_vault(){
      }else{
         let password = master_password1.trim();
         let hash = argon_lib::argon_password_hash(password);
-        let enc_hash = encode(hash);
-        let enc_data = "23";
-        let data = aes_lib::encrypt(enc_data.as_bytes(), enc_hash.as_str());
+        let split:Vec<_> = hash.split('$').collect();
+        let hash_split = split[5];
+        let enc_hash = encode(hash_split);
+        let enc_data = "0";
+        let data = aes_lib::encrypt(enc_data.as_bytes(), &enc_hash);
         let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
         if !dir_exist{
             let _ =fs::create_dir(VAULT_DIR); 
@@ -139,14 +141,16 @@ fn delete_vaults(){
         return;
     }
     let hash = argon_lib::argon_password_hash(password);
-    let enc_hash = encode(hash);
-    let decrypted_bytes = aes_lib::decrypt(data.as_str(), enc_hash.as_str()).unwrap();
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
     println!("Decrypt: {}",decrypt_string);
     if decrypt_string != "23"{
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
-        //fs::remove_file(file).expect("Vault already deleted?");
+        fs::remove_file(file).expect("Vault already deleted?");
         println!("Vault {} was deleted!", vault_name.trim().to_string());
     }
 }
