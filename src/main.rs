@@ -1,5 +1,5 @@
 use std::env;
-use std::io::{stdin, stdout, Write};
+use std::io::{stdin, stdout, Write, BufRead};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -166,12 +166,16 @@ fn list_vaults() {
     let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
     let vault = format!("{}{}",cur_path,VAULT_DIR);
     println!("List of current vaults:");
-    for file_vault in fs::read_dir(vault).unwrap() {
-        let split_path:Vec<_> = file_vault.unwrap().path().display().to_string().split('\\').collect();
-        let  file_count =  file_vault.unwrap().path().display().to_string().split('\\').count();
-        //let file = split_path[file_count - 1];
-        println!("{}", file_vault.unwrap().path().display());
+    println!("----------------");
+    let files_read= fs::read_dir(vault).unwrap();
+    for file_vault in  files_read{
+        let vault= file_vault.unwrap().path().as_path().display().to_string();
+        let split_path:Vec<_> = vault.split('\\').collect();
+        let  file_count =  vault.split('\\').count();
+        let  file: &str = split_path[file_count - 1].as_ref();
+        println!("{}", file.replace(".x", ""));
     }
+    println!("----------------");
 }
 
 
