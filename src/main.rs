@@ -64,6 +64,10 @@ fn main() {
     if arg1 == "-listv" {
         list_vaults();
     }
+
+    if arg1 == "-addapp" {
+        add_applicaitons();
+    }
 }
 
 // Create vaults
@@ -121,11 +125,12 @@ fn create_vault(){
 
 
 // Delete vaults.
+//TODO: fix current path by removing exe name from replace.
 fn delete_vaults(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
     println!("{}", "Enter vault name:");
-    let _=stdin().read_line(&mut vault_name);
+    let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().expect("");
     let current_path = current_exe.display();
     let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
@@ -177,6 +182,31 @@ fn list_vaults() {
     }
     println!("----------------");
 }
+
+// Add new apllication to vault.
+//TODO: fix current path by removing exe name from replace.
+ fn add_applicaitons(){
+    let mut vault_name = String::new();
+    let mut master_password = String::new();
+    println!("{}", "Enter vault name:");
+    let _ = stdin().read_line(&mut vault_name);
+    let current_exe = env::current_exe().expect("");
+    let current_path = current_exe.display();
+    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
+    let vault=format!("{}{}{}{}{}",cur_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    if !vault_exist_first{
+        println!("Vault {} does not exist!", vault_name.trim()); 
+        return;
+    }
+    println!("{}", "Master Password: ");
+    let _=stdin().read_line(&mut master_password);
+    let password = master_password.trim();
+    if password.trim().len() < 12{
+        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+        return;
+    }
+ }
 
 
 // Check maximum  of tries. used in while loops for exit them at a certain count.
