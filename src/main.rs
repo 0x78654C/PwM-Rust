@@ -1,4 +1,5 @@
 use std::env;
+use std::fmt::Display;
 use std::io::{stdin, stdout, Write, BufRead};
 use std::fs;
 use std::fs::File;
@@ -125,16 +126,14 @@ fn create_vault(){
 
 
 // Delete vaults.
-//TODO: fix current path by removing exe name from replace.
 fn delete_vaults(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
-    let current_exe = env::current_exe().expect("");
-    let current_path = current_exe.display();
-    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
-    let vault=format!("{}{}{}{}{}",cur_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let current_exe = env::current_exe().unwrap();
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
@@ -155,7 +154,6 @@ fn delete_vaults(){
     let enc_hash = encode(hash_split);
     let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    println!("Decrypt: {}",decrypt_string);
     if decrypt_string != "23"{
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
@@ -164,12 +162,26 @@ fn delete_vaults(){
     }
 }
 
+// Get executable path from current_exe
+ fn get_current_exe_path(current_exe:String)->String{
+    let cur_split:Vec<_> = current_exe.split("\\").collect();
+    let cur_count = current_exe.split("\\").count();
+    let mut cur_path = String::new();
+    let mut count = cur_count;
+    for splits in cur_split{
+        count -=1 ;
+        if count != 0{
+            cur_path.push_str(format!("{}{}",splits,"\\").as_str());
+        }
+    } 
+    return cur_path;
+ }
+
 // List vaults.
 fn list_vaults() {
     let current_exe = env::current_exe().expect("");
-    let current_path = current_exe.display();
-    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
-    let vault = format!("{}{}",cur_path,VAULT_DIR);
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault = format!("{}{}",current_path,VAULT_DIR);
     println!("List of current vaults:");
     println!("----------------");
     let files_read= fs::read_dir(vault).unwrap();
@@ -184,16 +196,14 @@ fn list_vaults() {
 }
 
 // Add new apllication to vault.
-//TODO: fix current path by removing exe name from replace.
  fn add_applicaitons(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
-    let current_exe = env::current_exe().expect("");
-    let current_path = current_exe.display();
-    let cur_path = current_path.to_string().replace("PwM-Rust.exe", "");
-    let vault=format!("{}{}{}{}{}",cur_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let current_exe = env::current_exe().unwrap();
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
