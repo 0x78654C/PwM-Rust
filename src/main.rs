@@ -10,12 +10,16 @@ use base64::encode;
 use argon2::{self, Config, ThreadMode, Variant, Version};
 mod aes_test;
 mod argon_test;
+mod json_test;
 
 #[path="./libs/argon_lib.rs"]
 mod argon_lib;
 
 #[path="./libs/aes_lib.rs"]
 mod aes_lib;
+
+#[path="./libs/json_lib.rs"]
+mod json_lib;
 
 const VAULT_DIR:&str = "Vaults";
 const HELP_MESSAGE: &str = "\
@@ -154,7 +158,7 @@ fn delete_vaults(){
     let enc_hash = encode(hash_split);
     let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    if decrypt_string != "23"{
+    if decrypt_string != "0"{
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
         fs::remove_file(file).expect("Vault already deleted?");
@@ -199,6 +203,10 @@ fn list_vaults() {
  fn add_applicaitons(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
+    let mut application = String::new();
+    let mut account = String::new();
+    let mut acc_password = String::new();
+    let mut count:i32 = 3;
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
@@ -209,6 +217,8 @@ fn list_vaults() {
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
+    let mut file = vault;
+    let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
     println!("{}", "Master Password: ");
     let _=stdin().read_line(&mut master_password);
     let password = master_password.trim();
@@ -216,12 +226,68 @@ fn list_vaults() {
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
+	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
+    if decrypt_string != "0"{
+        println!("{}", "Something went wrong. Check master password or vault name!");
+        return;
+    }
+    println!("{}", "Enter application name:");
+    let _ = stdin().read_line(&mut application);
+    let mut app  = String::from(application.trim());
+    //TODO: make check exceded tries
+    if app.trim().len() < 3{
+        println!("{}", "The length of application name should be at least 3 characters!");
+        return;
+    }
+
+    println!("Enter account name for {} :", app);
+    let _ = stdin().read_line(&mut account);
+    let mut acc  = String::from(account.trim());
+    //TODO: make check exceded tries
+    if acc.trim().len() < 3{
+        println!("{}", "The length of account name should be at least 3 characters!");
+        return;
+    }
+
+    println!("Enter password for {} :", account);
+    let _ = stdin().read_line(&mut acc);
+    let mut pass  = String::from(acc_password.trim());
+
+    //TODO: make check exceded tries
+    if pass.trim().len() < 1{
+        println!("{}", "Password should not be empty!");
+        return;
+    }
+
+    let serialize_data= json_lib::json_serialize(app, acc, pass);
+    let password = master_password.trim();
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let data = aes_lib::encrypt(serialize_data.as_bytes(), &enc_hash);
+
+    if vault_exist_first {
+        //TODO: store ecnrypted app in vault file.
+
+       // let mut file =  File::read((vault.to_string()).expect("File exist?");
+        //let _ = file.write_all(data.as_bytes());
+        println!("Data for {} is encrypted and added to vault!", vault_name.trim());
+    }else{
+        println!("Vault {} already exist!", vault_name);  
+    }
+
  }
 
 
 // Check maximum  of tries. used in while loops for exit them at a certain count.
 fn check_max_tries()->bool{
-    let mut TRIES = Globals{number:0};
+    let mut TRIES = Globals{number:3};
     if TRIES.number >= 3 {
         println!("You have exceeded the number of tries!");
         TRIES.up(TRIES.number*-1);
