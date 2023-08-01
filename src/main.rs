@@ -111,7 +111,7 @@ fn create_vault(){
         let split:Vec<_> = hash.split('$').collect();
         let hash_split = split[5];
         let enc_hash = encode(hash_split);
-        let enc_data = "0";
+        let enc_data = "";
         let data = aes_lib::encrypt(enc_data.as_bytes(), &enc_hash);
         let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
         if !dir_exist{
@@ -158,7 +158,7 @@ fn delete_vaults(){
     let enc_hash = encode(hash_split);
     let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
 	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    if decrypt_string != "0"{
+    if decrypt_string != "" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
         fs::remove_file(file).expect("Vault already deleted?");
@@ -217,8 +217,6 @@ fn list_vaults() {
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    let mut file = vault;
-    let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
     println!("{}", "Master Password: ");
     let _=stdin().read_line(&mut master_password);
     let password = master_password.trim();
@@ -226,13 +224,9 @@ fn list_vaults() {
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
-    let hash = argon_lib::argon_password_hash(password);
-    let split:Vec<_> = hash.split('$').collect();
-    let hash_split = split[5];
-    let enc_hash = encode(hash_split);
-    let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
-	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    if decrypt_string != "0"{
+
+    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    if decrypt_string != "" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
@@ -245,7 +239,7 @@ fn list_vaults() {
         return;
     }
 
-    println!("Enter account name for {} :", app);
+    println!("Enter account name for {}:", app);
     let _ = stdin().read_line(&mut account);
     let mut acc  = String::from(account.trim());
     //TODO: make check exceded tries
@@ -254,8 +248,8 @@ fn list_vaults() {
         return;
     }
 
-    println!("Enter password for {} :", account);
-    let _ = stdin().read_line(&mut acc);
+    println!("Enter password for {}:", acc);
+    let _ = stdin().read_line(&mut acc_password);
     let mut pass  = String::from(acc_password.trim());
 
     //TODO: make check exceded tries
@@ -265,25 +259,39 @@ fn list_vaults() {
     }
 
     let serialize_data= json_lib::json_serialize(app, acc, pass);
+    let data_added  =format!("{}{}","\r\n", serialize_data);
+    decrypt_string.push_str(data_added.as_str());
     let password = master_password.trim();
     let hash = argon_lib::argon_password_hash(password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
-    let data = aes_lib::encrypt(serialize_data.as_bytes(), &enc_hash);
-
+    let data =aes_lib::encrypt(decrypt_string.as_bytes(), &enc_hash);
     if vault_exist_first {
         //TODO: store ecnrypted app in vault file.
-
-       // let mut file =  File::read((vault.to_string()).expect("File exist?");
-        //let _ = file.write_all(data.as_bytes());
+        let mut file_open =  File::options().write(true).open(vault).unwrap();
+        write!(file_open,"{}", data).unwrap();
         println!("Data for {} is encrypted and added to vault!", vault_name.trim());
     }else{
         println!("Vault {} already exist!", vault_name);  
     }
 
- }
+ } 
 
+// Decrypt vaults.
+fn decrypt_vault(vault_path:String, master_password:String)->String{
+    let password = master_password.trim();
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let mut file = File::open(vault_path).unwrap();
+    let mut content = String::new();
+    let _ =file.read_to_string(&mut content);
+    let decrypted_bytes = aes_lib::decrypt(&content.as_str(), &enc_hash).unwrap();
+    let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
+    return String::from(decrypt_string);
+}
 
 // Check maximum  of tries. used in while loops for exit them at a certain count.
 fn check_max_tries()->bool{
