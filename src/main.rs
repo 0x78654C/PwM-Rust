@@ -77,6 +77,10 @@ fn main() {
     if arg1 == "-lista" {
         read_password();
     }
+
+    if arg1 == "-dela"{
+        delete_application();
+    }
 }
 
 // Create vaults
@@ -287,9 +291,6 @@ fn read_password(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
     let mut application = String::new();
-    let mut account = String::new();
-    let mut acc_password = String::new();
-    let mut count:i32 = 3;
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
@@ -335,6 +336,71 @@ fn read_password(){
     }
     println!("-------------------------");
 }
+
+fn delete_application(){
+    let mut vault_name = String::new();
+    let mut master_password = String::new();
+    let mut application = String::new();
+    let mut account = String::new();
+    println!("{}", "Enter vault name:");
+    let _ = stdin().read_line(&mut vault_name);
+    let current_exe = env::current_exe().unwrap();
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    if !vault_exist_first{
+        println!("Vault {} does not exist!", vault_name.trim()); 
+        return;
+    }
+    println!("{}", "Master Password: ");
+    let _=stdin().read_line(&mut master_password);
+    let password = master_password.trim();
+    if password.trim().len() < 12{
+        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+        return;
+    }
+
+    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    if decrypt_string != "" && !decrypt_string.contains("{"){
+        println!("{}", "Something went wrong. Check master password or vault name!");
+        return;
+    }
+    println!("{}", "Enter application name:");
+    let _ = stdin().read_line(&mut application);
+    let mut app  = String::from(application.trim());
+    //TODO: make check exceeded tries
+    if app.trim().len() == 0{
+        println!("Application name should not be empty!");
+        return;
+    }
+    if !decrypt_string.contains(&app){
+        println!("Application {} does not exist!",app)
+    }
+
+    println!("Enter account name for {}:", app);
+    let _ = stdin().read_line(&mut account);
+    let mut acc  = String::from(account.trim());
+    //TODO: make check exceded tries
+    if acc.trim().len() < 3{
+        println!("{}", "Account name should not be empty!");
+        return;
+    }
+    println!("{}",decrypt_string);
+    let mut decrypted_lines = decrypt_string.lines();
+    let mut list_values:Vec<String>= Vec::new();
+
+    for line in decrypted_lines{
+        let deserialize = json_lib::json_deserialize(line);
+        let split_deserialize:Vec<_> = deserialize.split("|").collect();
+        if split_deserialize[0] != app || split_deserialize[1] != acc{
+            list_values.push(line.to_string());
+        }
+    }
+    let final_vault = list_values.into_iter().collect::<String>();
+    println!("{}",final_vault);
+
+}
+
 
 // Decrypt vaults.
 // TODO: use secure string
