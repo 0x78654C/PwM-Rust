@@ -1,6 +1,6 @@
 use std::env;
 use std::fmt::Display;
-use std::io::{stdin, stdout, Write, BufRead};
+use std::io::{stdin, stdout, Write, BufRead, BufReader};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -72,6 +72,10 @@ fn main() {
 
     if arg1 == "-addapp" {
         add_applicaitons();
+    }
+
+    if arg1 == "-lista" {
+        read_password();
     }
 }
 
@@ -278,7 +282,62 @@ fn list_vaults() {
 
  } 
 
+ // Read password from vault.
+fn read_password(){
+    let mut vault_name = String::new();
+    let mut master_password = String::new();
+    let mut application = String::new();
+    let mut account = String::new();
+    let mut acc_password = String::new();
+    let mut count:i32 = 3;
+    println!("{}", "Enter vault name:");
+    let _ = stdin().read_line(&mut vault_name);
+    let current_exe = env::current_exe().unwrap();
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    if !vault_exist_first{
+        println!("Vault {} does not exist!", vault_name.trim()); 
+        return;
+    }
+    println!("{}", "Master Password: ");
+    let _=stdin().read_line(&mut master_password);
+    let password = master_password.trim();
+    if password.trim().len() < 12{
+        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+        return;
+    }
+
+    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    if decrypt_string != "" && !decrypt_string.contains("{"){
+        println!("{}", "Something went wrong. Check master password or vault name!");
+        return;
+    }
+    println!("{}", "Enter application name (leave blank for all applications):");
+    let _ = stdin().read_line(&mut application);
+    let mut app  = String::from(application.trim());
+    //TODO: make check exceeded tries
+    if app.trim().len() > 0{
+        println!("This is your decrypted data for {}:", app);
+    }else{
+        println!("This is your decrypted data for the entire vault:");
+    }
+    let decrypted_lines = decrypt_string.lines();
+    for line in decrypted_lines{
+        if line.len() >0 && line.contains(&app) {
+            let deserialize = json_lib::json_deserialize(line);
+            let split_deserialize:Vec<_> = deserialize.split("|").collect();
+            println!("-------------------------");
+            println!("Application Name:{}",split_deserialize[0]);
+            println!("Account Name    :{}",split_deserialize[1]);
+            println!("Password        :{}",split_deserialize[2]);
+        }
+    }
+    println!("-------------------------");
+}
+
 // Decrypt vaults.
+// TODO: use secure string
 fn decrypt_vault(vault_path:String, master_password:String)->String{
     let password = master_password.trim();
     let hash = argon_lib::argon_password_hash(password);
