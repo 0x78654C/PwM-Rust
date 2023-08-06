@@ -265,7 +265,6 @@ fn list_vaults() {
         println!("{}", "Password should not be empty!");
         return;
     }
-
     let serialize_data= json_lib::json_serialize(app, acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
@@ -274,7 +273,7 @@ fn list_vaults() {
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
-    let data =aes_lib::encrypt(decrypt_string.as_bytes(), &enc_hash);
+    let data =aes_lib::encrypt(decrypt_string.trim().as_bytes(), &enc_hash);
     if vault_exist_first {
         //TODO: store ecnrypted app in vault file.
         let mut file_open =  File::options().write(true).open(vault).unwrap();
@@ -360,14 +359,14 @@ fn delete_application(){
         return;
     }
 
-    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
     if decrypt_string != "" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
     println!("{}", "Enter application name:");
     let _ = stdin().read_line(&mut application);
-    let mut app  = String::from(application.trim());
+    let app  = String::from(application.trim());
     //TODO: make check exceeded tries
     if app.trim().len() == 0{
         println!("Application name should not be empty!");
@@ -379,25 +378,48 @@ fn delete_application(){
 
     println!("Enter account name for {}:", app);
     let _ = stdin().read_line(&mut account);
-    let mut acc  = String::from(account.trim());
+    let acc  = String::from(account.trim());
     //TODO: make check exceded tries
     if acc.trim().len() < 3{
         println!("{}", "Account name should not be empty!");
         return;
     }
-    println!("{}",decrypt_string);
-    let mut decrypted_lines = decrypt_string.lines();
+    let decrypted_lines = decrypt_string.lines();
     let mut list_values:Vec<String>= Vec::new();
-
+    let mut account_check:bool=false;
     for line in decrypted_lines{
+        if line.len() > 0 {
         let deserialize = json_lib::json_deserialize(line);
         let split_deserialize:Vec<_> = deserialize.split("|").collect();
         if split_deserialize[0] != app || split_deserialize[1] != acc{
-            list_values.push(line.to_string());
+            list_values.push(line.to_string()+"\r\n");
+        }else{
+            account_check = true;
         }
+      }
     }
+
+    if !account_check{
+        println!("Account {} does not exist!", acc);
+        return;
+    }
+
     let final_vault = list_values.into_iter().collect::<String>();
     println!("{}",final_vault);
+    println!("{}",password);
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let data =aes_lib::encrypt(final_vault.trim().as_bytes(), &enc_hash);
+    if vault_exist_first {
+        //TODO: store ecnrypted app in vault file.
+        let mut file_open =  File::options().write(true).open(vault).unwrap();
+        write!(file_open,"{}", data).unwrap();
+        println!("[-] Account {} for {} was deleted!",acc,app);
+    }else{
+        println!("Vault {} already exist!", vault_name);  
+    }
 
 }
 
