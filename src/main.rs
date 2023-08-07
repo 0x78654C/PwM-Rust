@@ -21,6 +21,7 @@ mod aes_lib;
 #[path="./libs/json_lib.rs"]
 mod json_lib;
 
+const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
 const HELP_MESSAGE: &str = "\
 PwM Copyright @ 2020-2022 0x078654c
@@ -94,8 +95,9 @@ fn create_vault(){
         println!("{}", "Vault name must be at least 3 characters long!");
         return;
     }
-
-    let vault=format!("{}{}{}{}{}",".\\",VAULT_DIR,"\\",vault_name.trim(),".x");
+    let current_exe = env::current_exe().unwrap();
+    let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if vault_exist_first{
         println!("Vault {} already exist!", vault_name.trim()); 
@@ -145,7 +147,7 @@ fn delete_vaults(){
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
-    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
@@ -176,14 +178,14 @@ fn delete_vaults(){
 
 // Get executable path from current_exe
  fn get_current_exe_path(current_exe:String)->String{
-    let cur_split:Vec<_> = current_exe.split("\\").collect();
-    let cur_count = current_exe.split("\\").count();
+    let cur_split:Vec<_> = current_exe.split(MAIN_SEPARTOR).collect();
+    let cur_count = current_exe.split(MAIN_SEPARTOR).count();
     let mut cur_path = String::new();
     let mut count = cur_count;
     for splits in cur_split{
         count -=1 ;
         if count != 0{
-            cur_path.push_str(format!("{}{}",splits,"\\").as_str());
+            cur_path.push_str(format!("{}{}",splits,MAIN_SEPARTOR).as_str());
         }
     } 
     return cur_path;
@@ -194,13 +196,18 @@ fn list_vaults() {
     let current_exe = env::current_exe().expect("");
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
     let vault = format!("{}{}",current_path,VAULT_DIR);
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    if !vault_exist_first{
+        println!("Vault {} does not exist!", vault.trim()); 
+        return;
+    }
     println!("List of current vaults:");
     println!("----------------");
     let files_read= fs::read_dir(vault).unwrap();
     for file_vault in  files_read{
         let vault= file_vault.unwrap().path().as_path().display().to_string();
-        let split_path:Vec<_> = vault.split('\\').collect();
-        let  file_count =  vault.split('\\').count();
+        let split_path:Vec<_> = vault.split(MAIN_SEPARTOR).collect();
+        let  file_count =  vault.split(MAIN_SEPARTOR).count();
         let  file: &str = split_path[file_count - 1].as_ref();
         println!("{}", file.replace(".x", ""));
     }
@@ -219,7 +226,7 @@ fn list_vaults() {
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
-    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
@@ -240,7 +247,7 @@ fn list_vaults() {
     }
     println!("{}", "Enter application name:");
     let _ = stdin().read_line(&mut application);
-    let mut app  = String::from(application.trim());
+    let app  = String::from(application.trim());
     //TODO: make check exceded tries
     if app.trim().len() < 3{
         println!("{}", "The length of application name should be at least 3 characters!");
@@ -249,7 +256,7 @@ fn list_vaults() {
 
     println!("Enter account name for {}:", app);
     let _ = stdin().read_line(&mut account);
-    let mut acc  = String::from(account.trim());
+    let acc  = String::from(account.trim());
     //TODO: make check exceded tries
     if acc.trim().len() < 3{
         println!("{}", "The length of account name should be at least 3 characters!");
@@ -258,14 +265,14 @@ fn list_vaults() {
 
     println!("Enter password for {}:", acc);
     let _ = stdin().read_line(&mut acc_password);
-    let mut pass  = String::from(acc_password.trim());
+    let pass  = String::from(acc_password.trim());
 
     //TODO: make check exceded tries
     if pass.trim().len() < 1{
         println!("{}", "Password should not be empty!");
         return;
     }
-    let serialize_data= json_lib::json_serialize(app, acc, pass);
+    let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
     let password = master_password.trim();
@@ -278,7 +285,7 @@ fn list_vaults() {
         //TODO: store ecnrypted app in vault file.
         let mut file_open =  File::options().write(true).open(vault).unwrap();
         write!(file_open,"{}", data).unwrap();
-        println!("Data for {} is encrypted and added to vault!", vault_name.trim());
+        println!("Data for {} is encrypted and added to vault!", app);
     }else{
         println!("Vault {} already exist!", vault_name);  
     }
@@ -294,7 +301,7 @@ fn read_password(){
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
-    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
@@ -345,7 +352,7 @@ fn delete_application(){
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
-    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,"\\",vault_name.trim(),".x");
+    let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         println!("Vault {} does not exist!", vault_name.trim()); 
