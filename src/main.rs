@@ -198,7 +198,7 @@ fn list_vaults() {
     let vault = format!("{}{}",current_path,VAULT_DIR);
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} does not exist!", vault.trim()); 
+        println!("There are no vaults created!"); 
         return;
     }
     println!("List of current vaults:");
