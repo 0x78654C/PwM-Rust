@@ -196,7 +196,7 @@ fn list_vaults() {
     let current_exe = env::current_exe().expect("");
     let current_path = get_current_exe_path(current_exe.as_path().display().to_string());
     let vault = format!("{}{}",current_path,VAULT_DIR);
-    let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
+    let vault_exist_first: bool = Path::new(vault.as_str()).is_dir();
     if !vault_exist_first{
         println!("There are no vaults created!"); 
         return;
@@ -275,6 +275,7 @@ fn list_vaults() {
     let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
+    println!("{}",decrypt_string);
     let password = master_password.trim();
     let hash = argon_lib::argon_password_hash(password);
     let split:Vec<_> = hash.split('$').collect();
