@@ -1,3 +1,5 @@
+//Password manager port from PwM cli
+
 use std::env;
 use std::fmt::Display;
 use std::io::{stdin, stdout, Write, BufRead, BufReader};
