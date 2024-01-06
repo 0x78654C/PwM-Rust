@@ -1,13 +1,13 @@
 use std::env;
-use std::fmt::Display;
-use std::io::{stdin, stdout, Write, BufRead, BufReader};
+
+use std::io::{stdin, Write, BufRead};
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
-use argon2::{self, Config, ThreadMode, Variant, Version};
+use argon2::{self};
 mod aes_test;
 mod argon_test;
 mod json_test;
@@ -221,7 +221,7 @@ fn list_vaults() {
     let mut application = String::new();
     let mut account = String::new();
     let mut acc_password = String::new();
-    let mut count:i32 = 3;
+    let _count:i32 = 3;
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
@@ -316,14 +316,14 @@ fn read_password(){
         return;
     }
 
-    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
     if decrypt_string != "" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
     println!("{}", "Enter application name (leave blank for all applications):");
     let _ = stdin().read_line(&mut application);
-    let mut app  = String::from(application.trim());
+    let app  = String::from(application.trim());
     //TODO: make check exceeded tries
     if app.trim().len() > 0{
         println!("This is your decrypted data for {}:", app);
