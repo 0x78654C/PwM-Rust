@@ -277,7 +277,6 @@ fn list_vaults() {
     let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
-    println!("{}",decrypt_string);
     let password = master_password.trim();
     let hash = argon_lib::argon_password_hash(password);
     let split:Vec<_> = hash.split('$').collect();
@@ -290,7 +289,7 @@ fn list_vaults() {
         write!(file_open,"{}", data).unwrap();
         println!("Data for {} is encrypted and added to vault!", app);
     }else{
-        println!("Vault {} already exist!", vault_name);  
+        println!("Vault {} does not exist!", vault_name);  
     }
 
  } 
@@ -414,23 +413,23 @@ fn delete_application(){
         return;
     }
 
-    let final_vault = list_values.into_iter().collect::<String>();
-    println!("{}",final_vault);
-    println!("{}",password);
+    let add_vault = list_values.into_iter().collect::<String>();
+    let final_vault = add_vault.trim(); 
     let hash = argon_lib::argon_password_hash(password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
-    let data =aes_lib::encrypt(final_vault.trim().as_bytes(), &enc_hash);
+    let data =aes_lib::encrypt(final_vault.as_bytes(), &enc_hash);
     if vault_exist_first {
         //TODO: store ecnrypted app in vault file.
-        let mut file_open =  File::options().write(true).open(vault).unwrap();
-        write!(file_open,"{}", data).unwrap();
+        let  v = vault.clone();
+        fs::remove_file(vault).expect("Vault already deleted?");
+        let mut file =  File::create(v.to_string()).expect("File exist?");
+        let _ = file.write_all(data.as_bytes());
         println!("[-] Account {} for {} was deleted!",acc,app);
     }else{
         println!("Vault {} already exist!", vault_name);  
     }
-
 }
 
 
