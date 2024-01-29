@@ -1,7 +1,14 @@
 {
     "version": "0.2.0",
     "configurations": [
-
+        {
+            "name": "(OSX) Launch",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceRoot}/target/debug/PwM-Rust",
+            "args": ["-dela"],
+            "cwd": "${workspaceRoot}",
+        },
         {
             "name": "(Windows) Launch",
             "type": "cppvsdbg",
@@ -12,14 +19,6 @@
             "cwd": "${workspaceRoot}",
             "environment": [],
             "externalConsole": true
-        },
-        {
-            "name": "(OSX) Launch",
-            "type": "lldb",
-            "request": "launch",
-            "program": "${workspaceRoot}/target/debug/foo",
-            "args": [],
-            "cwd": "${workspaceRoot}",
         }
     ]
 }
