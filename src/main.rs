@@ -443,6 +443,8 @@ fn update_application(){
     let mut master_password = String::new();
     let mut application = String::new();
     let mut account = String::new();
+    let mut acc_password = String::new();
+
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
@@ -486,17 +488,30 @@ fn update_application(){
         println!("{}", "Account name should not be empty!");
         return;
     }
+
+    println!("Enter password for {}:", acc);
+    let _ = stdin().read_line(&mut acc_password);
+    let pass  = String::from(acc_password.trim());
+
+    if pass.trim().len() < 1{
+        println!("{}", "Password should not be empty!");
+        return;
+    }
+
     let decrypted_lines = decrypt_string.lines();
     let mut list_values:Vec<String>= Vec::new();
     let mut account_check:bool=false;
+    
     for line in decrypted_lines{
         if line.len() > 0 {
         let deserialize = json_lib::json_deserialize(line);
         let split_deserialize:Vec<_> = deserialize.split("|").collect();
-        if split_deserialize[0] != app || split_deserialize[1] != acc{
+        if split_deserialize[0] == app || split_deserialize[1] == acc{
+            let serialize_data= json_lib::json_serialize(app.to_string(), acc.clone(), pass.clone());
+            let data_added  =format!("{}{}","\r\n", serialize_data);
             list_values.push(line.to_string()+"\r\n");
         }else{
-            account_check = true;
+            list_values.push(line.to_string()+"\r\n");
         }
       }
     }
@@ -506,7 +521,9 @@ fn update_application(){
         return;
     }
 
-
+    for lineIn in list_values{
+        println!("{}",lineIn);
+    }
 
 }
 
