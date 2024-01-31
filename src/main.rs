@@ -471,7 +471,7 @@ fn update_application(){
     println!("{}", "Enter application name:");
     let _ = stdin().read_line(&mut application);
     let app  = String::from(application.trim());
-    //TODO: make check exceeded tries
+
     if app.trim().len() == 0{
         println!("Application name should not be empty!");
         return;
@@ -483,7 +483,7 @@ fn update_application(){
     println!("Enter account name for {}:", app);
     let _ = stdin().read_line(&mut account);
     let acc  = String::from(account.trim());
-    //TODO: make check exceded tries
+
     if acc.trim().len() < 3{
         println!("{}", "Account name should not be empty!");
         return;
@@ -530,7 +530,6 @@ fn update_application(){
     let enc_hash = encode(hash_split);
     let data =aes_lib::encrypt(final_vault.as_bytes(), &enc_hash);
     if vault_exist_first {
-        //TODO: store ecnrypted app in vault file.
         let  v = vault.clone();
         fs::remove_file(vault).expect("Vault already deleted?");
         let mut file =  File::create(v.to_string()).expect("File exist?");

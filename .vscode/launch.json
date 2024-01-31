@@ -6,7 +6,7 @@
             "type": "lldb",
             "request": "launch",
             "program": "${workspaceRoot}/target/debug/PwM-Rust",
-            "args": ["-dela"],
+            "args": ["-updatea"],
             "cwd": "${workspaceRoot}",
         },
         {
