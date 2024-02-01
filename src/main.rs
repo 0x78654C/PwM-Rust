@@ -489,7 +489,7 @@ fn update_application(){
         return;
     }
 
-    println!("Enter password for {}:", acc);
+    println!("Enter new password for {}:", acc);
     let _ = stdin().read_line(&mut acc_password);
     let pass  = String::from(acc_password.trim());
 
@@ -506,10 +506,11 @@ fn update_application(){
         if line.len() > 0 {
         let deserialize = json_lib::json_deserialize(line);
         let split_deserialize:Vec<_> = deserialize.split("|").collect();
-        if split_deserialize[0] == app || split_deserialize[1] == acc{
+        if split_deserialize[0] == app && split_deserialize[1] == acc{
             let serialize_data= json_lib::json_serialize(app.to_string(), acc.clone(), pass.clone());
-            let data_added  =format!("{}{}","\r\n", serialize_data);
-            list_values.push(line.to_string()+"\r\n");
+            let data_added  =format!("{}", serialize_data);
+            account_check=true;
+            list_values.push(data_added+"\r\n");
         }else{
             list_values.push(line.to_string()+"\r\n");
         }
@@ -521,10 +522,23 @@ fn update_application(){
         return;
     }
 
-    for lineIn in list_values{
-        println!("{}",lineIn);
+    let add_vault = list_values.into_iter().collect::<String>();
+    let final_vault = add_vault.trim(); 
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let data =aes_lib::encrypt(final_vault.as_bytes(), &enc_hash);
+    if vault_exist_first {
+        //TODO: store ecnrypted app in vault file.
+        let  v = vault.clone();
+        fs::remove_file(vault).expect("Vault already deleted?");
+        let mut file =  File::create(v.to_string()).expect("File exist?");
+        let _ = file.write_all(data.as_bytes());
+        println!("[*] Password for {} was updated!", acc);
+    }else{
+        println!("Vault {} already exist!", vault_name);  
     }
-
 }
 
 // Decrypt vaults.
