@@ -1,4 +1,5 @@
-//Password manager port from PwM cli
+// Password manager port from PwM cli
+// Proof of concept.Not for real life usage.
 
 use std::env;
 
@@ -54,9 +55,19 @@ impl Globals{
     }
 }
 
+// Main function run.
 fn main() {
     let args: Vec<String> = env::args().collect();
+
+    // In case of no argument is passed to application.
+    if args.len() == 1 {
+        println!("{}","Use -h to list the parameters!\n");
+        return;
+    }
+
+    // Read first parameter.
     let arg1 = &args[1];
+
     if arg1 == "-h" {
         println!("{}", HELP_MESSAGE);
     }
