@@ -1,5 +1,6 @@
 // Password manager port from PwM cli
 // Proof of concept.Not for real life usage yet.
+// TODO: implement tries for passwords
 
 use std::env;
 
