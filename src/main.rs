@@ -1,5 +1,5 @@
 // Password manager port from PwM cli
-// Proof of concept.Not for real life usage.
+// Proof of concept.Not for real life usage yet.
 
 use std::env;
 
@@ -27,7 +27,7 @@ mod json_lib;
 const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
 const HELP_MESSAGE: &str = "\
-PwM Copyright @ 2020-2022 0x078654c
+PwM Copyright @ 2020-2024 0x078654c
 PwM - A simple password manager to store localy the authentification data encrypted for a application using Rijndael AES-256 and Argon2 for password hash.
 Contact: xcoding.dev@gmail.com
 
@@ -122,14 +122,15 @@ fn create_vault(){
     }
 
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password1);
+  
+    master_password1 = rpassword::read_password().unwrap();
     if master_password1.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
     println!("{}", "Confirm Master Password: ");
-    let _ = stdin().read_line(&mut master_password2);
 
+    master_password2 = rpassword::read_password().unwrap();
      if master_password1.trim() != master_password2.trim(){
         println!("{}", "Passwords are not the same!");
      }else{
@@ -173,7 +174,7 @@ fn delete_vaults(){
     let mut file = vault;
     let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password);
+    master_password =rpassword::read_password().unwrap();
     let password = master_password.trim();
     if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
@@ -250,7 +251,7 @@ fn list_vaults() {
         return;
     }
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password);
+    master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
     if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
@@ -325,7 +326,7 @@ fn read_password(){
         return;
     }
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password);
+    master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
     if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
@@ -376,7 +377,7 @@ fn delete_application(){
         return;
     }
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password);
+    master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
     if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
@@ -467,7 +468,7 @@ fn update_application(){
         return;
     }
     println!("{}", "Master Password: ");
-    let _=stdin().read_line(&mut master_password);
+    master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
     if password.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
@@ -501,7 +502,7 @@ fn update_application(){
     }
 
     println!("Enter new password for {}:", acc);
-    let _ = stdin().read_line(&mut acc_password);
+    acc_password=rpassword::read_password().unwrap();
     let pass  = String::from(acc_password.trim());
 
     if pass.trim().len() < 1{
