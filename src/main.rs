@@ -3,7 +3,8 @@
 // TODO: implement tries for passwords
 
 use std::env;
-
+extern crate secstr;
+use secstr::*;
 use std::io::{stdin, Write, BufRead};
 use std::fs;
 use std::fs::File;
@@ -124,14 +125,14 @@ fn create_vault(){
 
     println!("{}", "Master Password: ");
   
-    master_password1 = rpassword::read_password().unwrap();
+    master_password1 = SecStr::from(rpassword::read_password().unwrap()).to_string();
     if master_password1.trim().len() < 12{
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
     println!("{}", "Confirm Master Password: ");
 
-    master_password2 = rpassword::read_password().unwrap();
+    master_password2 =  SecStr::from(rpassword::read_password().unwrap()).to_string();
      if master_password1.trim() != master_password2.trim(){
         println!("{}", "Passwords are not the same!");
      }else{

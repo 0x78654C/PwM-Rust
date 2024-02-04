@@ -15,6 +15,7 @@ dependencies = [
  "rpassword",
  "rust-argon2",
  "rust-crypto",
+ "secstr",
  "serde",
  "serde_json",
 ]
@@ -364,6 +365,15 @@ name = "ryu"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ad4cc8da4ef723ed60bced201181d83791ad433213d8c24efffda1eec85d741"
+
+[[package]]
+name = "secstr"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e04f657244f605c4cf38f6de5993e8bd050c8a303f86aeabff142d5c7c113e12"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "serde"
