@@ -13,6 +13,8 @@ use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
 use argon2::{self};
+
+use crate::validator::validate_password;
 mod aes_test;
 mod argon_test;
 mod json_test;
@@ -25,6 +27,9 @@ mod aes_lib;
 
 #[path="./libs/json_lib.rs"]
 mod json_lib;
+
+#[path="./libs/password_validator.rs"]
+mod validator;
 
 const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
@@ -126,7 +131,7 @@ fn create_vault(){
     println!("{}", "Master Password: ");
   
     master_password1 = SecStr::from(rpassword::read_password().unwrap()).to_string();
-    if master_password1.trim().len() < 12{
+    if validate_password(master_password1.clone()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -178,7 +183,7 @@ fn delete_vaults(){
     println!("{}", "Master Password: ");
     master_password =rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if password.trim().len() < 12{
+    if validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -255,7 +260,7 @@ fn list_vaults() {
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if password.trim().len() < 12{
+    if  validate_password(password.to_string()) {
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -330,7 +335,7 @@ fn read_password(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if password.trim().len() < 12{
+    if validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -381,7 +386,7 @@ fn delete_application(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if password.trim().len() < 12{
+    if validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -472,7 +477,7 @@ fn update_application(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if password.trim().len() < 12{
+    if validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
