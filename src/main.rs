@@ -138,6 +138,8 @@ fn create_vault(){
     println!("{}", "Confirm Master Password: ");
 
     master_password2 =  rpassword::read_password().unwrap();
+
+    println!("{}|{}",master_password1,master_password2); //test only
      if master_password1.trim() != master_password2.trim(){
         println!("{}", "Passwords are not the same!");
      }else{
