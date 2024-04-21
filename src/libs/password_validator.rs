@@ -2,11 +2,11 @@
 // Check upper/lower case x1, digits, special chars, length of 12.
 pub fn validate_password (password:String)->bool{
     let pass = password;
-    let mut is_valid:bool=false;
-    if is_valid_length(pass.clone()) && contains_digit(pass.clone()) && contains_special_char(pass.clone()) && contais_lower_chars(pass.clone()) && contais_upper_chars(pass.clone()) {
-        is_valid = true;
-    }
-    return is_valid;
+    return is_valid_length(pass.clone()) 
+        && contains_digit(pass.clone()) 
+        && contains_special_char(pass.clone()) 
+        && contais_lower_chars(pass.clone()) 
+        && contais_upper_chars(pass.clone());
 }  
 
 
