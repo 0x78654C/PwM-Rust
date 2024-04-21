@@ -1,19 +1,22 @@
-use regex::Regex;
-
-// Validate password. TODO: fix it
+// Validate password.
+// Check upper/lower case x1, digits, special chars, length of 12.
 pub fn validate_password (password:String)->bool{
-    let re = Regex::new(r"^(?<=(.*[a-z]){3,})(?<=(.*[A-Z]){1,})(?<=(.*[0-9]){2,})(?<=(.*[!@#$%^&*()\-__+.]){1,}).{12,134}$").unwrap();
-    return !re.is_match(&password);
+    let pass = password;
+    let mut is_valid:bool=false;
+    if is_valid_length(pass.clone()) && contains_digit(pass.clone()) && contains_special_char(pass.clone()) && contais_lower_chars(pass.clone()) && contais_upper_chars(pass.clone()) {
+        is_valid = true;
+    }
+    return is_valid;
 }  
 
 
 // Check password length. Set to minimi 12
-pub fn is_valin_length( password:String)->bool{
-    return password.len()>11
+fn is_valid_length( password:String)->bool{
+    return password.len()>11;
 }
 
 // Check if password string contains numeric.
-pub fn contains_digit(password:String)->bool{
+pub fn contains_digit(password: String)->bool{
     let mut is_numeric:bool = false;  
     for char_pass in password.chars(){
         if char_pass.is_numeric() {
@@ -29,7 +32,7 @@ fn contains_special_char (password:String)->bool{
     let special_chars = "!@#$%^&*()\\-__+.";
     let mut is_special:bool = false;  
     for char_spec in special_chars.chars(){
-        if password.contains(special_chars) {
+        if password.contains(char_spec) {
             is_special = true;
             break;
         }
@@ -37,14 +40,26 @@ fn contains_special_char (password:String)->bool{
     return is_special;
 }
 
- fn contais_upper_lower_chars (password:String)->bool{
-    let mut is_numeric:bool = false;  
-    let mut is_upper:bool = false;
+// Check if is lower case.
+ fn contais_lower_chars (password:String)->bool{
+    let mut is_lower:bool = false;
     for char_pass in password.chars(){
-        if char_pass.is_numeric() {
-            is_numeric = true;
+        if char_pass.is_ascii_lowercase() {
+            is_lower =true;
             break;
         }
     }
-    return is_numeric
+    return is_lower;
+ }
+
+ // Check if is upper case.
+ fn contais_upper_chars (password:String)->bool{
+    let mut is_upper:bool = false;
+    for char_pass in password.chars(){
+        if char_pass.is_ascii_uppercase() {
+            is_upper =true;
+            break;
+        }
+    }
+    return is_upper;
  }
