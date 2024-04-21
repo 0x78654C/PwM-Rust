@@ -15,8 +15,13 @@ use base64::encode;
 use argon2::{self};
 
 use crate::validator::validate_password;
+#[path="./tests/aes_test.rs"]
 mod aes_test;
+
+#[path="./tests/argon_test.rs"]
 mod argon_test;
+
+#[path="./tests/json_test.rs"]
 mod json_test;
 
 #[path="./libs/argon_lib.rs"]
