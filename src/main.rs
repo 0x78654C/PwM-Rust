@@ -1,8 +1,8 @@
 // Password manager port from PwM cli
-// Proof of concept.Not for real life usage yet.
+// Proof of concept. Not for real life usage yet.
 // TODO: implement tries for passwords
 
-use std::env;
+use std::{env, io};
 extern crate secstr;
 use secstr::*;
 use std::io::{stdin, Write, BufRead};
@@ -129,14 +129,14 @@ fn create_vault(){
     }
 
     println!("{}", "Master Password: ");
-  
+    //let _= io::stdin().read_line(&mut master_password1); // test only
     master_password1 = rpassword::read_password().unwrap();
-    if validate_password(master_password1.clone()){
+    if !validate_password(master_password1.clone()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
     println!("{}", "Confirm Master Password: ");
-
+    //let _= io::stdin().read_line(&mut master_password2); // test only
     master_password2 =  rpassword::read_password().unwrap();
 
     println!("{}|{}",master_password1,master_password2); //test only
@@ -185,7 +185,7 @@ fn delete_vaults(){
     println!("{}", "Master Password: ");
     master_password =rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if validate_password(password.to_string()){
+    if !validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -262,7 +262,7 @@ fn list_vaults() {
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if  validate_password(password.to_string()) {
+    if  !validate_password(password.to_string()) {
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -337,7 +337,7 @@ fn read_password(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if validate_password(password.to_string()){
+    if !validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -388,7 +388,7 @@ fn delete_application(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if validate_password(password.to_string()){
+    if !validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
@@ -479,7 +479,7 @@ fn update_application(){
     println!("{}", "Master Password: ");
     master_password=rpassword::read_password().unwrap();
     let password = master_password.trim();
-    if validate_password(password.to_string()){
+    if !validate_password(password.to_string()){
         println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         return;
     }
