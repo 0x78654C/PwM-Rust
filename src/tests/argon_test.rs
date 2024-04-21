@@ -2,7 +2,7 @@
 use argon2::{self, Config, ThreadMode, Variant, Version};
  
 
-#[path="./libs/argon_lib.rs"]
+#[path="../libs/argon_lib.rs"]
 mod argon_lib;
 
 #[test]

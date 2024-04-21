@@ -1,5 +1,5 @@
 #[cfg(test)]
-#[path="./libs/aes_lib.rs"]
+#[path="../libs/aes_lib.rs"]
 mod aes_lib;
 
 #[test]

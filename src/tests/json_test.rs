@@ -1,6 +1,6 @@
 
 #[cfg(test)]
-#[path="./libs/json_lib.rs"]
+#[path="../libs/json_lib.rs"]
 mod json_lib;
 
 #[test]
