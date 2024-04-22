@@ -118,6 +118,7 @@ fn create_vault(){
     let mut vault_name = String::new();
     let mut master_password1 = String::new();
     let mut master_password2 = String::new();
+    let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
     if vault_name.len() < 3{
@@ -133,41 +134,58 @@ fn create_vault(){
         return;
     }
 
-    println!("{}", "Master Password: ");
-    //let _= io::stdin().read_line(&mut master_password1); // test only
-    master_password1 = rpassword::read_password().unwrap();
-    if !validate_password(master_password1.clone()){
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
-    }
-    println!("{}", "Confirm Master Password: ");
-    //let _= io::stdin().read_line(&mut master_password2); // test only
-    master_password2 =  rpassword::read_password().unwrap();
+    loop {
+        println!("{}", "Master Password: ");
+        let _= io::stdin().read_line(&mut master_password1); // test only
+        //master_password1 = rpassword::read_password().unwrap();
 
-    println!("{}|{}",master_password1,master_password2); //test only
-     if master_password1.trim() != master_password2.trim(){
-        println!("{}", "Passwords are not the same!");
-     }else{
-        let password = master_password1.trim();
-        let hash = argon_lib::argon_password_hash(password);
-        let split:Vec<_> = hash.split('$').collect();
-        let hash_split = split[5];
-        let enc_hash = encode(hash_split);
-        let enc_data = "";
-        let data = aes_lib::encrypt(enc_data.as_bytes(), &enc_hash);
-        let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
-        if !dir_exist{
-            let _ =fs::create_dir(VAULT_DIR); 
+        println!("{}", "Confirm Master Password: ");
+        let _= io::stdin().read_line(&mut master_password2); // test only
+        //master_password2 =  rpassword::read_password().unwrap();
+        let len2: usize = master_password2.len();
+        let len1: usize = master_password1.len();
+        master_password2.truncate(len2-2);
+        master_password1.truncate(len1-2); 
+        if !validate_password(master_password2.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
         }
-        let vault_exist: bool = Path::new(vault.as_str()).is_file();
-        if !vault_exist{
-            let mut file =  File::create(vault.to_string()).expect("File exist?");
-            let _ = file.write_all(data.as_bytes());
-            println!("Vault {} was created!", vault_name.trim());
-        }else{
-            println!("Vault {} already exist!", vault);  
+        if master_password1.trim() != master_password2.trim(){
+            println!("{}", "Passwords are not the same!");
         }
-     }
+        else{
+            break;
+        }
+        if tries>1 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
+        println!("{}|{}",master_password1,master_password2); //test only
+        if (master_password1.trim() != master_password2.trim()) || !validate_password(master_password2.clone()){
+            tries += 1;
+            master_password1=String::new();
+            master_password2=String::new();
+        }
+    }  
+
+    let password = master_password1.trim();
+    let hash = argon_lib::argon_password_hash(password);
+    let split:Vec<_> = hash.split('$').collect();
+    let hash_split = split[5];
+    let enc_hash = encode(hash_split);
+    let enc_data = "";
+    let data = aes_lib::encrypt(enc_data.as_bytes(), &enc_hash);
+    let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
+    if !dir_exist{
+        let _ =fs::create_dir(VAULT_DIR); 
+    }
+    let vault_exist: bool = Path::new(vault.as_str()).is_file();
+    if !vault_exist{
+        let mut file =  File::create(vault.to_string()).expect("File exist?");
+        let _ = file.write_all(data.as_bytes());
+        println!("Vault {} was created!", vault_name.trim());
+    }else{
+        println!("Vault {} already exist!", vault);  
+    }
 }
 
 
@@ -175,6 +193,8 @@ fn create_vault(){
 fn delete_vaults(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
+    let mut password="";
+    let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
     let current_exe = env::current_exe().unwrap();
@@ -187,14 +207,27 @@ fn delete_vaults(){
     }
     let mut file = vault;
     let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
-    println!("{}", "Master Password: ");
-    master_password =rpassword::read_password().unwrap();
-    let password = master_password.trim();
-    if !validate_password(password.to_string()){
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
+    loop{
+        println!("{}", "Master Password: ");
+        //master_password =rpassword::read_password().unwrap();
+        let _= io::stdin().read_line(&mut master_password); // test only
+        let len: usize = master_password.len();
+        master_password.truncate(len-2); 
+        if !validate_password(master_password.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            tries += 1;
+            master_password=String::new();
+        } else {
+            break;
+        }
+
+        if tries>2 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
     }
-    let hash = argon_lib::argon_password_hash(password);
+    let password = master_password.clone();
+    let hash = argon_lib::argon_password_hash(&password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
