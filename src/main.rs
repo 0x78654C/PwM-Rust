@@ -12,9 +12,10 @@ use std::io::prelude::*;
 use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
-use argon2::{self};
-
+use argon2::{self}; 
 use crate::validator::validate_password;
+use color_print::cprintln;
+
 #[path="./tests/aes_test.rs"]
 mod aes_test;
 
@@ -56,16 +57,6 @@ Contact: xcoding.dev@gmail.com
       -lista   : Displays the existing applications in a vault.
 ";
 
-
-struct Globals {
-    number: i32
-}
-
-impl Globals{
-    fn up(&mut self, num: i32){
-        self.number += num;
-    }
-}
 
 // Main function run.
 fn main() {
@@ -121,8 +112,8 @@ fn create_vault(){
     let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
-    if vault_name.len() < 3{
-        println!("{}", "Vault name must be at least 3 characters long!");
+    if vault_name.len() > 2{
+        cprintln!("<yellow>Vault name must be at least 3 characters long!</yellow>");
         return;
     }
     let current_exe = env::current_exe().unwrap();
@@ -273,6 +264,7 @@ fn list_vaults() {
 
 // Add new apllication to vault.
  fn add_applicaitons(){
+    let mut tries:i32 =0;
     let mut vault_name = String::new();
     let mut master_password = String::new();
     let mut application = String::new();
@@ -289,15 +281,28 @@ fn list_vaults() {
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    println!("{}", "Master Password: ");
-    master_password=rpassword::read_password().unwrap();
-    let password = master_password.trim();
-    if  !validate_password(password.to_string()) {
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
+
+    loop{
+        println!("{}", "Master Password: ");
+        //master_password =rpassword::read_password().unwrap();
+        let _= io::stdin().read_line(&mut master_password); // test only
+        let len: usize = master_password.len();
+        master_password.truncate(len-2); 
+        if !validate_password(master_password.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            tries += 1;
+            master_password=String::new();
+        } else {
+            break;
+        }
+
+        if tries>2 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
     }
 
-    let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let mut decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
@@ -332,8 +337,8 @@ fn list_vaults() {
     let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
-    let password = master_password.trim();
-    let hash = argon_lib::argon_password_hash(password);
+    let password = master_password.clone();
+    let hash = argon_lib::argon_password_hash(password.as_str());
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -351,6 +356,7 @@ fn list_vaults() {
 
  // Read password from vault.
 fn read_password(){
+    let mut tries:i32 =0;
     let mut vault_name = String::new();
     let mut master_password = String::new();
     let mut application = String::new();
@@ -364,15 +370,27 @@ fn read_password(){
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    println!("{}", "Master Password: ");
-    master_password=rpassword::read_password().unwrap();
-    let password = master_password.trim();
-    if !validate_password(password.to_string()){
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
+    loop{
+        println!("{}", "Master Password: ");
+        //master_password =rpassword::read_password().unwrap();
+        let _= io::stdin().read_line(&mut master_password); // test only
+        let len: usize = master_password.len();
+        master_password.truncate(len-2); 
+        if !validate_password(master_password.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            tries += 1;
+            master_password=String::new();
+        } else {
+            break;
+        }
+
+        if tries>2 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
     }
 
-    let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let decrypt_string = decrypt_vault(vault.to_string(), master_password);
     if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
@@ -401,6 +419,7 @@ fn read_password(){
 }
 
 fn delete_application(){
+    let mut tries:i32 =0;
     let mut vault_name = String::new();
     let mut master_password = String::new();
     let mut application = String::new();
@@ -415,15 +434,27 @@ fn delete_application(){
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    println!("{}", "Master Password: ");
-    master_password=rpassword::read_password().unwrap();
-    let password = master_password.trim();
-    if !validate_password(password.to_string()){
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
+    loop{
+        println!("{}", "Master Password: ");
+        //master_password =rpassword::read_password().unwrap();
+        let _= io::stdin().read_line(&mut master_password); // test only
+        let len: usize = master_password.len();
+        master_password.truncate(len-2); 
+        if !validate_password(master_password.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            tries += 1;
+            master_password=String::new();
+        } else {
+            break;
+        }
+
+        if tries>2 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
     }
 
-    let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
@@ -437,7 +468,8 @@ fn delete_application(){
         return;
     }
     if !decrypt_string.contains(&app){
-        println!("Application {} does not exist!",app)
+        println!("Application {} does not exist!",app);
+        return;
     }
 
     println!("Enter account name for {}:", app);
@@ -452,7 +484,7 @@ fn delete_application(){
     let mut list_values:Vec<String>= Vec::new();
     let mut account_check:bool=false;
     for line in decrypted_lines{
-        if line.len() > 0 {
+        if line.len() > 2 {
         let deserialize = json_lib::json_deserialize(line);
         let split_deserialize:Vec<_> = deserialize.split("|").collect();
         if split_deserialize[0] != app || split_deserialize[1] != acc{
@@ -470,7 +502,7 @@ fn delete_application(){
 
     let add_vault = list_values.into_iter().collect::<String>();
     let final_vault = add_vault.trim(); 
-    let hash = argon_lib::argon_password_hash(password);
+    let hash = argon_lib::argon_password_hash(master_password.clone().as_str());
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -490,6 +522,7 @@ fn delete_application(){
 
 // Update applicaiton password.
 fn update_application(){
+    let mut tries:i32 =0;
     let mut vault_name = String::new();
     let mut master_password = String::new();
     let mut application = String::new();
@@ -506,15 +539,28 @@ fn update_application(){
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    println!("{}", "Master Password: ");
-    master_password=rpassword::read_password().unwrap();
-    let password = master_password.trim();
-    if !validate_password(password.to_string()){
-        println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
-        return;
+
+    loop{
+        println!("{}", "Master Password: ");
+        //master_password =rpassword::read_password().unwrap();
+        let _= io::stdin().read_line(&mut master_password); // test only
+        let len: usize = master_password.len();
+        master_password.truncate(len-2); 
+        if !validate_password(master_password.clone()){
+            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            tries += 1;
+            master_password=String::new();
+        } else {
+            break;
+        }
+
+        if tries>2 {
+            println!("{}", "You have exceeded the number of tries!");
+            return;
+        }
     }
 
-    let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
+    let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
@@ -554,7 +600,7 @@ fn update_application(){
     let mut account_check:bool=false;
     
     for line in decrypted_lines{
-        if line.len() > 0 {
+        if line.len() > 2 {
         let deserialize = json_lib::json_deserialize(line);
         let split_deserialize:Vec<_> = deserialize.split("|").collect();
         if split_deserialize[0] == app && split_deserialize[1] == acc{
@@ -575,7 +621,7 @@ fn update_application(){
 
     let add_vault = list_values.into_iter().collect::<String>();
     let final_vault = add_vault.trim(); 
-    let hash = argon_lib::argon_password_hash(password);
+    let hash = argon_lib::argon_password_hash(master_password.clone().as_str());
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -607,13 +653,3 @@ fn decrypt_vault(vault_path:String, master_password:String)->String{
     return String::from(decrypt_string);
 }
 
-// Check maximum  of tries. used in while loops for exit them at a certain count.
-fn check_max_tries()->bool{
-    let mut TRIES = Globals{number:3};
-    if TRIES.number >= 3 {
-        println!("You have exceeded the number of tries!");
-        TRIES.up(TRIES.number*-1);
-        return true;
-    }
-    return false;
-}
