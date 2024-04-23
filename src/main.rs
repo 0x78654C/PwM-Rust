@@ -14,7 +14,7 @@ use core::str::from_utf8;
 use base64::encode;
 use argon2::{self}; 
 use crate::validator::validate_password;
-use color_print::cprintln;
+
 
 #[path="./tests/aes_test.rs"]
 mod aes_test;
@@ -36,6 +36,9 @@ mod json_lib;
 
 #[path="./libs/password_validator.rs"]
 mod validator;
+
+#[path="./libs/color_write.rs"]
+mod color_write;
 
 const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
@@ -113,7 +116,7 @@ fn create_vault(){
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
     if vault_name.len() > 2{
-        cprintln!("<yellow>Vault name must be at least 3 characters long!</yellow>");
+        color_write::write_yellow("Vault name must be at least 3 characters long!".to_string());
         return;
     }
     let current_exe = env::current_exe().unwrap();
@@ -138,16 +141,16 @@ fn create_vault(){
         master_password2.truncate(len2-2);
         master_password1.truncate(len1-2); 
         if !validate_password(master_password2.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            color_write::write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
         }
         if master_password1.trim() != master_password2.trim(){
-            println!("{}", "Passwords are not the same!");
+            color_write::write_red("Passwords are not the same!".to_string());
         }
         else{
             break;
         }
         if tries>1 {
-            println!("{}", "You have exceeded the number of tries!");
+            color_write::write_red("You have exceeded the number of tries!".to_string());
             return;
         }
         println!("{}|{}",master_password1,master_password2); //test only
