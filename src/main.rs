@@ -172,7 +172,7 @@ fn create_vault(){
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
-    let enc_data = "";
+    let enc_data = "1";
     let data = aes_lib::encrypt(enc_data.as_bytes(), &enc_hash);
     let dir_exist:bool = Path::new(&VAULT_DIR).is_dir(); 
     if !dir_exist{
@@ -193,7 +193,6 @@ fn create_vault(){
 fn delete_vaults(){
     let mut vault_name = String::new();
     let mut master_password = String::new();
-    let mut password="";
     let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _ = stdin().read_line(&mut vault_name);
@@ -205,8 +204,7 @@ fn delete_vaults(){
         println!("Vault {} does not exist!", vault_name.trim()); 
         return;
     }
-    let mut file = vault;
-    let data = fs::read_to_string(&mut file).expect("Something went wrong on read vault data!");
+    let file = vault;
     loop{
         println!("{}", "Master Password: ");
         //master_password =rpassword::read_password().unwrap();
@@ -226,17 +224,11 @@ fn delete_vaults(){
             return;
         }
     }
-    let password = master_password.clone();
-    let hash = argon_lib::argon_password_hash(&password);
-    let split:Vec<_> = hash.split('$').collect();
-    let hash_split = split[5];
-    let enc_hash = encode(hash_split);
-    let decrypted_bytes = aes_lib::decrypt(data.as_str(), &enc_hash).unwrap();
-	let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
-    if decrypt_string != "" && !decrypt_string.contains("{"){
+	let decrypt_string = decrypt_vault(file.clone(),master_password); 
+    if decrypt_string != "1" && !decrypt_string.contains("{") {
         println!("{}", "Something went wrong. Check master password or vault name!");
     }else{
-        fs::remove_file(file).expect("Vault already deleted?");
+        fs::remove_file(file.clone()).expect("Vault already deleted?");
         println!("Vault {} was deleted!", vault_name.trim().to_string());
     }
 }
@@ -306,7 +298,7 @@ fn list_vaults() {
     }
 
     let mut decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
-    if decrypt_string != "" && !decrypt_string.contains("{"){
+    if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
@@ -381,7 +373,7 @@ fn read_password(){
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
-    if decrypt_string != "" && !decrypt_string.contains("{"){
+    if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
@@ -396,7 +388,7 @@ fn read_password(){
     }
     let decrypted_lines = decrypt_string.lines();
     for line in decrypted_lines{
-        if line.len() >0 && line.contains(&app) {
+        if line.len() >2 && line.contains(&app) {
             let deserialize = json_lib::json_deserialize(line);
             let split_deserialize:Vec<_> = deserialize.split("|").collect();
             println!("-------------------------");
@@ -432,7 +424,7 @@ fn delete_application(){
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
-    if decrypt_string != "" && !decrypt_string.contains("{"){
+    if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
@@ -523,7 +515,7 @@ fn update_application(){
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), password.to_string());
-    if decrypt_string != "" && !decrypt_string.contains("{"){
+    if decrypt_string != "1" && !decrypt_string.contains("{"){
         println!("{}", "Something went wrong. Check master password or vault name!");
         return;
     }
