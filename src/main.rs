@@ -13,6 +13,10 @@ use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
 use argon2::{self}; 
+use crate::color_write::write_yellow;
+use crate::color_write::write_red;
+use crate::color_write::write_green;
+use crate::color_write::write_cyan;
 use crate::validator::validate_password;
 
 
@@ -115,8 +119,10 @@ fn create_vault(){
     let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
-    if vault_name.len() > 2{
-        color_write::write_yellow("Vault name must be at least 3 characters long!".to_string());
+    let len = vault_name.len();
+    vault_name.truncate(len-2);
+    if vault_name.len() < 3 {
+        write_yellow("Vault name must be at least 3 characters long!".to_string());
         return;
     }
     let current_exe = env::current_exe().unwrap();
@@ -124,7 +130,7 @@ fn create_vault(){
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if vault_exist_first{
-        println!("Vault {} already exist!", vault_name.trim()); 
+        write_yellow("Vault vault_name.trim()} already exist!".to_string()); 
         return;
     }
 
@@ -141,23 +147,22 @@ fn create_vault(){
         master_password2.truncate(len2-2);
         master_password1.truncate(len1-2); 
         if !validate_password(master_password2.clone()){
-            color_write::write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
         }
         if master_password1.trim() != master_password2.trim(){
-            color_write::write_red("Passwords are not the same!".to_string());
+            write_red("Passwords are not the same!".to_string());
         }
-        else{
-            break;
-        }
+  
         if tries>1 {
-            color_write::write_red("You have exceeded the number of tries!".to_string());
+            write_red("You have exceeded the number of tries!".to_string());
             return;
         }
-        println!("{}|{}",master_password1,master_password2); //test only
         if (master_password1.trim() != master_password2.trim()) || !validate_password(master_password2.clone()){
-            tries += 1;
             master_password1=String::new();
             master_password2=String::new();
+        }
+        else{
+            break;  
         }
     }  
 
@@ -176,9 +181,10 @@ fn create_vault(){
     if !vault_exist{
         let mut file =  File::create(vault.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
-        println!("Vault {} was created!", vault_name.trim());
+        write_cyan("[+] Vault {vault_name.trim()} was created!".to_string());
     }else{
-        println!("Vault {} already exist!", vault);  
+        let concate = "Vault {vault.to_string()} already exist!".to_string();
+        write_yellow(concate);  
     }
 }
 
