@@ -14,7 +14,7 @@
             "type": "cppvsdbg",
             "request": "launch",
             "program": "${workspaceRoot}/target/debug/PwM-Rust.exe",
-            "args": ["-addapp"],
+            "args": ["-createv"],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],
