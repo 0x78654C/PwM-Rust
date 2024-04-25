@@ -120,7 +120,7 @@ fn create_vault(){
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
     let len = vault_name.len();
-    vault_name.truncate(len-2);
+    vault_name.truncate(len-1);
     if vault_name.len() < 3 {
         write_yellow("Vault name must be at least 3 characters long!".to_string());
         return;
@@ -130,7 +130,8 @@ fn create_vault(){
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if vault_exist_first{
-        write_yellow("Vault vault_name.trim()} already exist!".to_string()); 
+        let info ="Vault ".to_owned() + vault_name.trim() + " already exist!";
+        write_yellow(info); 
         return;
     }
 
@@ -181,10 +182,11 @@ fn create_vault(){
     if !vault_exist{
         let mut file =  File::create(vault.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
-        write_cyan("[+] Vault {vault_name.trim()} was created!".to_string());
+        let info = "[+] Vault ".to_owned() + vault_name.trim() +" was created!";
+        write_cyan(info);
     }else{
-        let concate = "Vault {vault.to_string()} already exist!".to_string();
-        write_yellow(concate);  
+        let info = "[+] Vault ".to_owned() + vault_name.trim()+" already exists!";
+        write_yellow(info);  
     }
 }
 
