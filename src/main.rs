@@ -116,6 +116,7 @@ fn create_vault(){
     let mut vault_name = String::new();
     let mut master_password1 = String::new();
     let mut master_password2 = String::new();
+
     let mut tries:i32 =0;
     println!("{}", "Enter vault name:");
     let _=stdin().read_line(&mut vault_name);
@@ -145,20 +146,22 @@ fn create_vault(){
         //master_password2 =  rpassword::read_password().unwrap();
         let len2: usize = master_password2.len();
         let len1: usize = master_password1.len();
-        master_password2.truncate(len2-2);
-        master_password1.truncate(len1-2); 
-        if !validate_password(master_password2.clone()){
-            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
-        }
+        master_password2.truncate(len2 - 1);
+        master_password1.truncate(len1- 1); 
+
         if master_password1.trim() != master_password2.trim(){
             write_red("Passwords are not the same!".to_string());
         }
-  
-        if tries>1 {
+
+        if !validate_password(master_password2.clone()){
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
+            tries+=1;
+        }
+        if tries > 2 {
             write_red("You have exceeded the number of tries!".to_string());
             return;
         }
-        if (master_password1.trim() != master_password2.trim()) || !validate_password(master_password2.clone()){
+        if  (master_password1.trim() != master_password2.trim()) || !validate_password(master_password2.clone()){
             master_password1=String::new();
             master_password2=String::new();
         }
@@ -166,9 +169,10 @@ fn create_vault(){
             break;  
         }
     }  
-
-    let password = master_password1.trim();
-    let hash = argon_lib::argon_password_hash(password);
+    if master_password2.clone().len() < 1 {
+            return;
+    }
+    let hash = argon_lib::argon_password_hash(&master_password2);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
