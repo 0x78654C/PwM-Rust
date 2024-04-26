@@ -216,7 +216,7 @@ fn delete_vaults(){
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-2); 
+        master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
             println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
             tries += 1;
@@ -302,7 +302,7 @@ fn list_vaults() {
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-2); 
+        master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
             println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
             tries += 1;
@@ -390,7 +390,7 @@ fn read_password(){
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-2); 
+        master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
             println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
             tries += 1;
@@ -454,7 +454,7 @@ fn delete_application(){
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-2); 
+        master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
             println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
             tries += 1;
@@ -560,7 +560,7 @@ fn update_application(){
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-2); 
+        master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
             println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
             tries += 1;
