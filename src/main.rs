@@ -15,7 +15,6 @@ use base64::encode;
 use argon2::{self}; 
 use crate::color_write::write_yellow;
 use crate::color_write::write_red;
-use crate::color_write::write_green;
 use crate::color_write::write_cyan;
 use crate::validator::validate_password;
 
@@ -148,7 +147,7 @@ fn create_vault(){
         let len1: usize = master_password1.len();
         master_password2.truncate(len2 - 1);
         master_password1.truncate(len1- 1); 
-
+        
         if master_password1.trim() != master_password2.trim(){
             write_red("Passwords are not the same!".to_string());
         }
@@ -667,4 +666,3 @@ fn decrypt_vault(vault_path:String, master_password:String)->String{
     let decrypt_string = from_utf8(&decrypted_bytes).unwrap(); 
     return String::from(decrypt_string);
 }
-
