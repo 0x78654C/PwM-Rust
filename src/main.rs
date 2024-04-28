@@ -5,6 +5,7 @@
 use std::{env, io};
 extern crate secstr;
 use secstr::*;
+use serde_json::to_writer_pretty;
 use std::io::{stdin, Write, BufRead};
 use std::fs;
 use std::fs::File;
@@ -206,7 +207,8 @@ fn delete_vaults(){
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} does not exist!", vault_name.trim()); 
+        let inf:String = "Vault ".to_owned() + vault_name.trim()+" does not exist!";
+        write_yellow(inf); 
         return;
     }
     let file = vault;
@@ -217,7 +219,7 @@ fn delete_vaults(){
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+        write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
             tries += 1;
             master_password=String::new();
         } else {
@@ -225,16 +227,17 @@ fn delete_vaults(){
         }
 
         if tries>2 {
-            println!("{}", "You have exceeded the number of tries!");
+            write_yellow("You have exceeded the number of tries!".to_string());
             return;
         }
     }
 	let decrypt_string = decrypt_vault(file.clone(),master_password); 
     if decrypt_string != "1" && !decrypt_string.contains("{") {
-        println!("{}", "Something went wrong. Check master password or vault name!");
+        write_yellow("Something went wrong. Check master password or vault name!".to_string());
     }else{
         fs::remove_file(file.clone()).expect("Vault already deleted?");
-        println!("Vault {} was deleted!", vault_name.trim().to_string());
+        let inf  = "Vault ".to_owned()+vault_name.trim()+" was deleted!";
+        write_yellow(inf);
     }
 }
 
@@ -260,7 +263,7 @@ fn list_vaults() {
     let vault = format!("{}{}",current_path,VAULT_DIR);
     let vault_exist_first: bool = Path::new(vault.as_str()).is_dir();
     if !vault_exist_first{
-        println!("There are no vaults created!"); 
+        write_yellow("There are no vaults created!".to_string()); 
         return;
     }
     println!("List of current vaults:");
@@ -292,7 +295,8 @@ fn list_vaults() {
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} does not exist!", vault_name.trim()); 
+        let inf = "Vault ".to_owned()+vault_name.trim()+" does not exist!";
+        write_yellow(inf);
         return;
     }
 
@@ -303,7 +307,7 @@ fn list_vaults() {
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_owned());
             tries += 1;
             master_password=String::new();
         } else {
@@ -311,14 +315,14 @@ fn list_vaults() {
         }
 
         if tries>2 {
-            println!("{}", "You have exceeded the number of tries!");
+            write_yellow("You have exceeded the number of tries!".to_string());
             return;
         }
     }
 
     let mut decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        println!("{}", "Something went wrong. Check master password or vault name!");
+        write_yellow("Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name:");
@@ -326,7 +330,7 @@ fn list_vaults() {
     let app  = String::from(application.trim());
     //TODO: make check exceded tries
     if app.trim().len() < 3{
-        println!("{}", "The length of application name should be at least 3 characters!");
+        write_yellow("The length of application name should be at least 3 characters!".to_string());
         return;
     }
 
@@ -334,8 +338,8 @@ fn list_vaults() {
     let _ = stdin().read_line(&mut account);
     let acc  = String::from(account.trim());
     //TODO: make check exceded tries
-    if acc.trim().len() < 3{
-        println!("{}", "The length of account name should be at least 3 characters!");
+    if acc.trim().len() < 3{    
+        write_yellow("The length of account name should be at least 3 characters!".to_string());
         return;
     }
 
@@ -345,7 +349,7 @@ fn list_vaults() {
 
     //TODO: make check exceded tries
     if pass.trim().len() < 1{
-        println!("{}", "Password should not be empty!");
+        write_yellow( "Password should not be empty!".to_string());
         return;
     }
     let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
@@ -361,9 +365,11 @@ fn list_vaults() {
         //TODO: store ecnrypted app in vault file.
         let mut file_open =  File::options().write(true).open(vault).unwrap();
         write!(file_open,"{}", data).unwrap();
-        println!("Data for {} is encrypted and added to vault!", app);
+        let inf = "Data for ".to_owned()+&app+" is encrypted and added to vault!";
+        write_yellow(inf);
     }else{
-        println!("Vault {} does not exist!", vault_name);  
+        let inf  ="Vault ".to_owned()+&vault_name+" does not exist!"; 
+        write_yellow(inf);  
     }
 
  } 
@@ -381,7 +387,8 @@ fn read_password(){
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} does not exist!", vault_name.trim()); 
+        let inf = "Vault ".to_owned()+ vault_name.trim()+" does not exist!";
+        write_yellow(inf);
         return;
     }
     loop{
@@ -391,7 +398,7 @@ fn read_password(){
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
             master_password=String::new();
         } else {
@@ -399,14 +406,14 @@ fn read_password(){
         }
 
         if tries>2 {
-            println!("{}", "You have exceeded the number of tries!");
+            write_yellow("You have exceeded the number of tries!".to_string());
             return;
         }
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), master_password);
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        println!("{}", "Something went wrong. Check master password or vault name!");
+        write_yellow( "Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name (leave blank for all applications):");
@@ -455,7 +462,7 @@ fn delete_application(){
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
             master_password=String::new();
         } else {
@@ -463,14 +470,14 @@ fn delete_application(){
         }
 
         if tries>2 {
-            println!("{}", "You have exceeded the number of tries!");
+            write_yellow("You have exceeded the number of tries!".to_string());
             return;
         }
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        println!("{}", "Something went wrong. Check master password or vault name!");
+         write_yellow("Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name:");
@@ -491,7 +498,7 @@ fn delete_application(){
     let acc  = String::from(account.trim());
     //TODO: make check exceded tries
     if acc.trim().len() < 3{
-        println!("{}", "Account name should not be empty!");
+        write_yellow("Account name should not be empty!".to_string());
         return;
     }
     let decrypted_lines = decrypt_string.lines();
@@ -510,7 +517,8 @@ fn delete_application(){
     }
 
     if !account_check{
-        println!("Account {} does not exist!", acc);
+        let inf = "Account ".to_owned()+&acc+" does not exist!";
+        write_yellow(inf);
         return;
     }
 
@@ -529,7 +537,8 @@ fn delete_application(){
         let _ = file.write_all(data.as_bytes());
         println!("[-] Account {} for {} was deleted!",acc,app);
     }else{
-        println!("Vault {} already exist!", vault_name);  
+        let inf ="Vault ".to_owned()+&vault_name+" already exist!"; 
+        write_yellow(inf);
     }
 }
 
@@ -550,7 +559,8 @@ fn update_application(){
     let vault=format!("{}{}{}{}{}",current_path,VAULT_DIR,MAIN_SEPARTOR,vault_name.trim(),".x");
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
-        println!("Vault {} does not exist!", vault_name.trim()); 
+        let inf =  "Vault ".to_owned()+vault_name.trim()+" does not exist!";
+        write_yellow(inf);
         return;
     }
 
@@ -561,7 +571,7 @@ fn update_application(){
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-            println!("{}", "Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!");
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
             master_password=String::new();
         } else {
@@ -569,14 +579,14 @@ fn update_application(){
         }
 
         if tries>2 {
-            println!("{}", "You have exceeded the number of tries!");
+            write_yellow("You have exceeded the number of tries!".to_string());
             return;
         }
     }
 
     let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        println!("{}", "Something went wrong. Check master password or vault name!");
+        write_red("Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name:");
@@ -584,11 +594,12 @@ fn update_application(){
     let app  = String::from(application.trim());
 
     if app.trim().len() == 0{
-        println!("Application name should not be empty!");
+        write_yellow("Application name should not be empty!".to_string());
         return;
     }
     if !decrypt_string.contains(&app){
-        println!("Application {} does not exist!",app)
+        let inf = "Application ".to_owned()+&app+" does not exist!";
+        write_yellow(inf);
     }
 
     println!("Enter account name for {}:", app);
@@ -596,7 +607,7 @@ fn update_application(){
     let acc  = String::from(account.trim());
 
     if acc.trim().len() < 3{
-        println!("{}", "Account name should not be empty!");
+        write_yellow("Account name should not be empty!".to_string());
         return;
     }
 
@@ -605,7 +616,7 @@ fn update_application(){
     let pass  = String::from(acc_password.trim());
 
     if pass.trim().len() < 1{
-        println!("{}", "Password should not be empty!");
+        write_yellow("Password should not be empty!".to_string());
         return;
     }
 
@@ -629,7 +640,8 @@ fn update_application(){
     }
 
     if !account_check{
-        println!("Account {} does not exist!", acc);
+        let inf = "Account ".to_owned()+&acc+" does not exist!"; 
+        write_yellow(inf);
         return;
     }
 
@@ -647,7 +659,8 @@ fn update_application(){
         let _ = file.write_all(data.as_bytes());
         println!("[*] Password for {} was updated!", acc);
     }else{
-        println!("Vault {} already exist!", vault_name);  
+        let inf = "Vault ".to_owned()+&vault_name+" already exist!";
+        write_yellow(inf);
     }
 }
 
