@@ -17,8 +17,9 @@ use argon2::{self};
 use crate::color_write::write_yellow;
 use crate::color_write::write_red;
 use crate::color_write::write_cyan;
+use crate::color_write::write_color;
 use crate::validator::validate_password;
-
+use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[path="./tests/aes_test.rs"]
 mod aes_test;
@@ -154,7 +155,7 @@ fn create_vault(){
         }
 
         if !validate_password(master_password2.clone()){
-            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
+            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries+=1;
         }
         if tries > 2 {
@@ -187,7 +188,7 @@ fn create_vault(){
         let mut file =  File::create(vault.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
         let info = "[+] Vault ".to_owned() + vault_name.trim() +" was created!";
-        write_cyan(info);
+        write_cyan(info,false);
     }else{
         let info = "[+] Vault ".to_owned() + vault_name.trim()+" already exists!";
         write_yellow(info);  
@@ -219,7 +220,7 @@ fn delete_vaults(){
         let len: usize = master_password.len();
         master_password.truncate(len-1); 
         if !validate_password(master_password.clone()){
-        write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!!".to_string());
+        write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
             master_password=String::new();
         } else {
@@ -233,10 +234,10 @@ fn delete_vaults(){
     }
 	let decrypt_string = decrypt_vault(file.clone(),master_password); 
     if decrypt_string != "1" && !decrypt_string.contains("{") {
-        write_yellow("Something went wrong. Check master password or vault name!".to_string());
+        write_red("Something went wrong. Check master password or vault name!".to_string());
     }else{
         fs::remove_file(file.clone()).expect("Vault already deleted?");
-        let inf  = "Vault ".to_owned()+vault_name.trim()+" was deleted!";
+        let inf  = "[-] Vault ".to_owned()+vault_name.trim()+" was deleted!";
         write_yellow(inf);
     }
 }
@@ -301,11 +302,12 @@ fn list_vaults() {
     }
 
     loop{
-        println!("{}", "Master Password: ");
+        print!("{}","Enter master password for vault: ");
+        write_cyan(vault_name.to_string(),true);
         //master_password =rpassword::read_password().unwrap();
         let _= io::stdin().read_line(&mut master_password); // test only
         let len: usize = master_password.len();
-        master_password.truncate(len-1); 
+        master_password.truncate(len - 1); 
         if !validate_password(master_password.clone()){
             write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_owned());
             tries += 1;
@@ -322,7 +324,7 @@ fn list_vaults() {
 
     let mut decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        write_yellow("Something went wrong. Check master password or vault name!".to_string());
+        write_red("Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name:");
@@ -334,7 +336,8 @@ fn list_vaults() {
         return;
     }
 
-    println!("Enter account name for {}:", app);
+    print!("{}","Enter account name for ");
+    write_color(app.to_string(),true, Color::Magenta);
     let _ = stdin().read_line(&mut account);
     let acc  = String::from(account.trim());
     //TODO: make check exceded tries
@@ -343,7 +346,8 @@ fn list_vaults() {
         return;
     }
 
-    println!("Enter password for {}:", acc);
+    print!("{}", "Enter password for ");
+    write_color(acc.to_string(),true, Color::Green);
     let _ = stdin().read_line(&mut acc_password);
     let pass  = String::from(acc_password.trim());
 
