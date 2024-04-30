@@ -21,10 +21,28 @@ pub fn write_red(text:String){
 }
 
 // Write text in cyan.
-pub fn write_cyan(text:String){
+pub fn write_cyan(text:String, is_same_line:bool){
     let mut stdout = StandardStream::stdout(ColorChoice::Always);
     let _ = stdout.set_color(ColorSpec::new().set_fg(Some(Color::Cyan)));
-    writeln!(&mut stdout, "{}", text);
+    if is_same_line {
+        write!(&mut stdout, "{}", text);
+    }else {
+        writeln!(&mut stdout, "{}", text);
+    }
     let _ =  stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
     writeln!(&mut stdout, "{}", "");
 }
+
+// Write text colorized.
+pub fn write_color(text:String, is_same_line:bool, color:Color){
+    let mut stdout = StandardStream::stdout(ColorChoice::Always);
+    let _ = stdout.set_color(ColorSpec::new().set_fg(Some(color)));
+    if is_same_line {
+        write!(&mut stdout, "{}", text);
+    }else {
+        writeln!(&mut stdout, "{}", text);
+    }
+    let _ =  stdout.set_color(ColorSpec::new().set_fg(Some(Color::White)));
+    writeln!(&mut stdout, "{}", "");
+}
+
