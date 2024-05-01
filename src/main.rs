@@ -5,7 +5,6 @@
 use std::{env, io};
 extern crate secstr;
 use secstr::*;
-use serde_json::to_writer_pretty;
 use std::io::{stdin, Write, BufRead};
 use std::fs;
 use std::fs::File;
@@ -139,17 +138,12 @@ fn create_vault(){
 
     loop {
         println!("{}", "Master Password: ");
-        let _= io::stdin().read_line(&mut master_password1); // test only
-        //master_password1 = rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password1); // test only
+        master_password1 = rpassword::read_password().unwrap();
 
         println!("{}", "Confirm Master Password: ");
-        let _= io::stdin().read_line(&mut master_password2); // test only
-        //master_password2 =  rpassword::read_password().unwrap();
-        let len2: usize = master_password2.len();
-        let len1: usize = master_password1.len();
-        master_password2.truncate(len2 - 1);
-        master_password1.truncate(len1- 1); 
-        
+        //let _= io::stdin().read_line(&mut master_password2); // test only
+        master_password2 =  rpassword::read_password().unwrap();;
         if master_password1.trim() != master_password2.trim(){
             write_red("Passwords are not the same!".to_string());
         }
@@ -173,6 +167,7 @@ fn create_vault(){
     if master_password2.clone().len() < 1 {
             return;
     }
+
     let hash = argon_lib::argon_password_hash(&master_password2);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
@@ -215,10 +210,8 @@ fn delete_vaults(){
     let file = vault;
     loop{
         println!("{}", "Master Password: ");
-        //master_password =rpassword::read_password().unwrap();
-        let _= io::stdin().read_line(&mut master_password); // test only
-        let len: usize = master_password.len();
-        master_password.truncate(len-1); 
+        master_password =rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password); // test only
         if !validate_password(master_password.clone()){
         write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
@@ -304,10 +297,8 @@ fn list_vaults() {
     loop{
         print!("{}","Enter master password for vault: ");
         write_cyan(vault_name.to_string(),true);
-        //master_password =rpassword::read_password().unwrap();
-        let _= io::stdin().read_line(&mut master_password); // test only
-        let len: usize = master_password.len();
-        master_password.truncate(len - 1); 
+        master_password =rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password); // test only
         if !validate_password(master_password.clone()){
             write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_owned());
             tries += 1;
@@ -359,8 +350,7 @@ fn list_vaults() {
     let serialize_data= json_lib::json_serialize(app.to_string(), acc, pass);
     let data_added  =format!("{}{}","\r\n", serialize_data);
     decrypt_string.push_str(data_added.as_str());
-    let password = master_password.clone();
-    let hash = argon_lib::argon_password_hash(password.as_str());
+    let hash = argon_lib::argon_password_hash(&master_password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -369,8 +359,8 @@ fn list_vaults() {
         //TODO: store ecnrypted app in vault file.
         let mut file_open =  File::options().write(true).open(vault).unwrap();
         write!(file_open,"{}", data).unwrap();
-        let inf = "Data for ".to_owned()+&app+" is encrypted and added to vault!";
-        write_yellow(inf);
+        print!("{}","Data is encrypted and added to vault for application ");
+        write_color(app.to_string(),true, Color::Magenta);
     }else{
         let inf  ="Vault ".to_owned()+&vault_name+" does not exist!"; 
         write_yellow(inf);  
@@ -397,10 +387,8 @@ fn read_password(){
     }
     loop{
         println!("{}", "Master Password: ");
-        //master_password =rpassword::read_password().unwrap();
-        let _= io::stdin().read_line(&mut master_password); // test only
-        let len: usize = master_password.len();
-        master_password.truncate(len-1); 
+        master_password =rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password); // test only
         if !validate_password(master_password.clone()){
             write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
@@ -414,10 +402,9 @@ fn read_password(){
             return;
         }
     }
-
     let decrypt_string = decrypt_vault(vault.to_string(), master_password);
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-        write_yellow( "Something went wrong. Check master password or vault name!".to_string());
+        write_red( "Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name (leave blank for all applications):");
@@ -425,7 +412,8 @@ fn read_password(){
     let app  = String::from(application.trim());
     //TODO: make check exceeded tries
     if app.trim().len() > 0{
-        println!("This is your decrypted data for {}:", app);
+        println!("This is your decrypted data for ");
+        write_color(app.to_string(),true, Color::Magenta);
     }else{
         println!("This is your decrypted data for the entire vault:");
     }
@@ -461,10 +449,8 @@ fn delete_application(){
     }
     loop{
         println!("{}", "Master Password: ");
-        //master_password =rpassword::read_password().unwrap();
-        let _= io::stdin().read_line(&mut master_password); // test only
-        let len: usize = master_password.len();
-        master_password.truncate(len-1); 
+        master_password =rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password); // test only 
         if !validate_password(master_password.clone()){
             write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
@@ -478,10 +464,9 @@ fn delete_application(){
             return;
         }
     }
-
     let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
-         write_yellow("Something went wrong. Check master password or vault name!".to_string());
+         write_red("Something went wrong. Check master password or vault name!".to_string());
         return;
     }
     println!("{}", "Enter application name:");
@@ -525,10 +510,9 @@ fn delete_application(){
         write_yellow(inf);
         return;
     }
-
     let add_vault = list_values.into_iter().collect::<String>();
     let final_vault = add_vault.trim(); 
-    let hash = argon_lib::argon_password_hash(master_password.clone().as_str());
+    let hash = argon_lib::argon_password_hash(&master_password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -539,7 +523,8 @@ fn delete_application(){
         fs::remove_file(vault).expect("Vault already deleted?");
         let mut file =  File::create(v.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
-        println!("[-] Account {} for {} was deleted!",acc,app);
+        let inf ="[-] Account ".to_owned()+&acc+" for "+&app+" was deleted!"; 
+        write_yellow(inf);
     }else{
         let inf ="Vault ".to_owned()+&vault_name+" already exist!"; 
         write_yellow(inf);
@@ -569,11 +554,10 @@ fn update_application(){
     }
 
     loop{
-        println!("{}", "Master Password: ");
-        //master_password =rpassword::read_password().unwrap();
-        let _= io::stdin().read_line(&mut master_password); // test only
-        let len: usize = master_password.len();
-        master_password.truncate(len-1); 
+        print!("{}","Enter master password for vault: ");
+        write_cyan(vault_name.to_string(),true);
+        master_password =rpassword::read_password().unwrap();
+        //let _= io::stdin().read_line(&mut master_password); // test only
         if !validate_password(master_password.clone()){
             write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
             tries += 1;
@@ -587,7 +571,6 @@ fn update_application(){
             return;
         }
     }
-
     let decrypt_string = decrypt_vault(vault.to_string(), master_password.clone());
     if decrypt_string != "1" && !decrypt_string.contains("{"){
         write_red("Something went wrong. Check master password or vault name!".to_string());
@@ -606,7 +589,8 @@ fn update_application(){
         write_yellow(inf);
     }
 
-    println!("Enter account name for {}:", app);
+    print!("{}","Enter account name for ");
+    write_color(app.to_string(),true, Color::Magenta);
     let _ = stdin().read_line(&mut account);
     let acc  = String::from(account.trim());
 
@@ -615,7 +599,8 @@ fn update_application(){
         return;
     }
 
-    println!("Enter new password for {}:", acc);
+    print!("{}", "Enter new password for ");
+    write_color(acc.to_string(),true, Color::Green);
     acc_password=rpassword::read_password().unwrap();
     let pass  = String::from(acc_password.trim());
 
@@ -651,7 +636,7 @@ fn update_application(){
 
     let add_vault = list_values.into_iter().collect::<String>();
     let final_vault = add_vault.trim(); 
-    let hash = argon_lib::argon_password_hash(master_password.clone().as_str());
+    let hash = argon_lib::argon_password_hash(&master_password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
     let enc_hash = encode(hash_split);
@@ -661,7 +646,8 @@ fn update_application(){
         fs::remove_file(vault).expect("Vault already deleted?");
         let mut file =  File::create(v.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
-        println!("[*] Password for {} was updated!", acc);
+        print!("{}", "[*] Password for was updated for ");
+        write_color(acc.to_string(),true, Color::Green);
     }else{
         let inf = "Vault ".to_owned()+&vault_name+" already exist!";
         write_yellow(inf);
@@ -671,7 +657,7 @@ fn update_application(){
 // Decrypt vaults.
 // TODO: use secure string
 fn decrypt_vault(vault_path:String, master_password:String)->String{
-    let password = master_password.trim();
+    let password = &master_password.trim().to_string();
     let hash = argon_lib::argon_password_hash(password);
     let split:Vec<_> = hash.split('$').collect();
     let hash_split = split[5];
