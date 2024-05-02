@@ -123,7 +123,7 @@ fn create_vault(){
     let len = vault_name.len();
     vault_name.truncate(len-1);
     if vault_name.len() < 3 {
-        write_yellow("Vault name must be at least 3 characters long!".to_string());
+        write_color("Vault name must be at least 3 characters long!".to_string(),false,Color::Yellow);
         return;
     }
     let current_exe = env::current_exe().unwrap();
@@ -132,7 +132,7 @@ fn create_vault(){
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if vault_exist_first{
         let info ="Vault ".to_owned() + vault_name.trim() + " already exist!";
-        write_yellow(info); 
+        write_color(info,true,Color::Yellow); 
         return;
     }
 
@@ -145,15 +145,15 @@ fn create_vault(){
         //let _= io::stdin().read_line(&mut master_password2); // test only
         master_password2 =  rpassword::read_password().unwrap();;
         if master_password1.trim() != master_password2.trim(){
-            write_red("Passwords are not the same!".to_string());
+            write_color("Passwords are not the same!".to_string(),false,Color::Red);
         }
 
         if !validate_password(master_password2.clone()){
-            write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
+            write_color("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string(),false,Color::Yellow);
             tries+=1;
         }
         if tries > 2 {
-            write_red("You have exceeded the number of tries!".to_string());
+            write_color("You have exceeded the number of tries!".to_string(),true,Color::Yellow);
             return;
         }
         if  (master_password1.trim() != master_password2.trim()) || !validate_password(master_password2.clone()){
@@ -183,10 +183,10 @@ fn create_vault(){
         let mut file =  File::create(vault.to_string()).expect("File exist?");
         let _ = file.write_all(data.as_bytes());
         let info = "[+] Vault ".to_owned() + vault_name.trim() +" was created!";
-        write_cyan(info,false);
+        write_color(info,false,Color::Cyan);
     }else{
         let info = "[+] Vault ".to_owned() + vault_name.trim()+" already exists!";
-        write_yellow(info);  
+        write_color(info,false,Color::Yellow);  
     }
 }
 
@@ -204,7 +204,7 @@ fn delete_vaults(){
     let vault_exist_first: bool = Path::new(vault.as_str()).is_file();
     if !vault_exist_first{
         let inf:String = "Vault ".to_owned() + vault_name.trim()+" does not exist!";
-        write_yellow(inf); 
+        write_color(inf,true,Color::Yellow); 
         return;
     }
     let file = vault;
@@ -213,7 +213,7 @@ fn delete_vaults(){
         master_password =rpassword::read_password().unwrap();
         //let _= io::stdin().read_line(&mut master_password); // test only
         if !validate_password(master_password.clone()){
-        write_yellow("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string());
+        write_color("Password must be at least 12 characters, and must include at least one upper case letter, one lower case letter, one numeric digit, one special character and no space!".to_string(),false,Color::Yellow);
             tries += 1;
             master_password=String::new();
         } else {
@@ -221,17 +221,17 @@ fn delete_vaults(){
         }
 
         if tries>2 {
-            write_yellow("You have exceeded the number of tries!".to_string());
+            write_color("You have exceeded the number of tries!".to_string(),true,Color::Yellow);
             return;
         }
     }
 	let decrypt_string = decrypt_vault(file.clone(),master_password); 
     if decrypt_string != "1" && !decrypt_string.contains("{") {
-        write_red("Something went wrong. Check master password or vault name!".to_string());
+        write_color("Something went wrong. Check master password or vault name!".to_string(),true,Color::Red);
     }else{
         fs::remove_file(file.clone()).expect("Vault already deleted?");
         let inf  = "[-] Vault ".to_owned()+vault_name.trim()+" was deleted!";
-        write_yellow(inf);
+        write_color(inf,true,Color::Yellow);
     }
 }
 
