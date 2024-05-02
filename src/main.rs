@@ -13,11 +13,11 @@ use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
 use argon2::{self}; 
-use crate::color_write::write_yellow;
-use crate::color_write::write_red;
-use crate::color_write::write_cyan;
-use crate::color_write::write_color;
-use crate::validator::validate_password;
+use crate::color_write_lib::write_yellow;
+use crate::color_write_lib::write_red;
+use crate::color_write_lib::write_cyan;
+use crate::color_write_lib::write_color;
+use crate::password_validator_lib::validate_password;
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 #[path="./tests/aes_test.rs"]
@@ -38,11 +38,11 @@ mod aes_lib;
 #[path="./libs/json_lib.rs"]
 mod json_lib;
 
-#[path="./libs/password_validator.rs"]
-mod validator;
+#[path="./libs/password_validator_lib.rs"]
+mod password_validator_lib;
 
-#[path="./libs/color_write.rs"]
-mod color_write;
+#[path="./libs/color_write_lib.rs"]
+mod color_write_lib;
 
 const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
