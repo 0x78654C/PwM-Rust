@@ -1,6 +1,6 @@
 // Password manager port from PwM cli
 // Proof of concept. Not for real life usage yet.
-// TODO: implement tries for passwords
+// TODO: implement secure string check and put same ecryption algorithm as C# version
 
 use std::{env, io};
 extern crate secstr;
