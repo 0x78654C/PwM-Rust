@@ -6,4 +6,4 @@ Left TODO:
  
  -- Secure string read massterpassword
  
- -- Set same Argon2id algorith as on original version.
+ -- Set same Argon2id algorithm as on original version.
