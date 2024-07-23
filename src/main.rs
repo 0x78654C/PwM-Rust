@@ -2,9 +2,8 @@
 // Proof of concept. Not for real life usage yet.
 // TODO: implement secure string check and put same ecryption algorithm as C# version
 
-use std::{env, io};
+use std::{env};
 extern crate secstr;
-use secstr::*;
 use std::io::{stdin, Write, BufRead};
 use std::fs;
 use std::fs::File;
@@ -12,10 +11,10 @@ use std::io::prelude::*;
 use std::path::Path;
 use core::str::from_utf8;
 use base64::encode;
-use argon2::{self}; 
+ 
 use crate::color_write_lib::write_color;
 use crate::password_validator_lib::validate_password;
-use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
+use termcolor::{Color};
 
 #[path="./tests/aes_test.rs"]
 mod aes_test;

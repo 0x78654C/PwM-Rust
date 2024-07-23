@@ -1,5 +1,5 @@
 // Lib using termcolor crate to print lines with color.
-use std::io::{stdin, Write, BufRead};
+use std::io::{Write};
 use termcolor::{Color, ColorChoice, ColorSpec, StandardStream, WriteColor};
 
 // Write text colorized.
