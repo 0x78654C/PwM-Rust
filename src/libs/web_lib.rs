@@ -1,7 +1,12 @@
-use http::{Request, Response};
+extern crate hyper;
+use hyper::Request;
 
-
-pub fn get_data(api: &str) -> String(){
-    let mut request = Request::builder().uri(api);
-    return request.body();
+// Get body data from web GET request
+pub  fn get_data(url: &str) -> String{
+   
+    let req = Request::builder()
+    .uri(url)
+    .header(hyper::header::HOST, authority.as_str())
+    .body(Empty::<Bytes>::new())
+    return body;
 }
