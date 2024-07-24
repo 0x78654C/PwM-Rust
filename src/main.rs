@@ -1,4 +1,4 @@
-// Password manager port from PwM cli
+// Password manager port from PwM cli.
 // Proof of concept. Not for real life usage yet.
 // TODO: implement secure string check and put same ecryption algorithm as C# version
 
@@ -25,6 +25,9 @@ mod argon_test;
 #[path="./tests/json_test.rs"]
 mod json_test;
 
+#[path="./tests/web_test.rs"]
+mod web_lib_test;
+
 #[path="./libs/argon_lib.rs"]
 mod argon_lib;
 
@@ -39,6 +42,10 @@ mod password_validator_lib;
 
 #[path="./libs/color_write_lib.rs"]
 mod color_write_lib;
+
+#[path="./libs/web_lib.rs"]
+mod web_lib;
+
 
 const MAIN_SEPARTOR:&str = std::path::MAIN_SEPARATOR_STR;
 const VAULT_DIR:&str = "Vaults";
