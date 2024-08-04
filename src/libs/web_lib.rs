@@ -1,12 +1,13 @@
-extern crate hyper;
-use hyper::Request;
 
-// Get body data from web GET request
-pub  fn get_data(url: &str) -> String{
-   
-    let req = Request::builder()
-    .uri(url)
-    .header(hyper::header::HOST, authority.as_str())
-    .body(Empty::<Bytes>::new())
-    return body;
+
+pub async fn get_data(
+    url: &str,
+) -> Result<reqwest::Response, reqwest::Error> {
+    let client = reqwest::Client::new();
+    let response = client
+        .get(url)
+        .timeout(std::time::Duration::from_secs(180))
+        .send()
+        .await?;
+    Ok(response)
 }
