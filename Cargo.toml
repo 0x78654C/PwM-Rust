@@ -21,3 +21,12 @@ secstr = "0.5.1"
 regex = "1.10.3"
 termcolor = "1.4.1"
 hyper = "1.4.1"
+tokio = { version = "1.12.0", features = ["full"] }
+pretty_env_logger = "0.5"
+http-body-util = "0.1"
+bytes = "1"
+form_urlencoded = "1"
+http = "1"
+futures-util = { version = "0.3", default-features = false }
+reqwest = "0.12.5"
+futures = "0.3"
