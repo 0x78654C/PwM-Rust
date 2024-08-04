@@ -2,6 +2,7 @@
 // Proof of concept. Not for real life usage yet.
 // TODO: implement secure string check and put same ecryption algorithm as C# version
 
+
 use std::{env};
 extern crate secstr;
 use std::io::{stdin, Write, BufRead};
